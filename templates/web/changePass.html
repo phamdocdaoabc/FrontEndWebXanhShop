@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="author" content="mironcoder" />
+  <meta name="email" content="mironcoder@gmail.com" />
+  <meta name="profile" content="https://themeforest.net/user/mironcoder" />
+  <meta name="template" content="greeny" />
+  <meta name="title" content="greeny - Ecommerce Food Store HTML Template" />
+  <meta name="keywords"
+    content="organic, food, shop, ecommerce, store, html, bootstrap, template, agriculture, vegetables, products, farm, grocery, natural, online" />
+  <title>Thế giới nông sản</title>
+  <link rel="icon" href="/images/logo/logoWeb.png" />
+  <link rel="stylesheet" href="/static/fonts/flaticon/flaticon.css" />
+  <link rel="stylesheet" href="/static/fonts/icofont/icofont.min.css" />
+  <link rel="stylesheet" href="/static/fonts/fontawesome/fontawesome.min.css" />
+  <link rel="stylesheet" href="/static/vendor/venobox/venobox.min.css" />
+  <link rel="stylesheet" href="/static/vendor/slickslider/slick.min.css" />
+  <link rel="stylesheet" href="/static/vendor/niceselect/nice-select.min.css" />
+  <link rel="stylesheet" href="/static/vendor/bootstrap/bootstrap.min.css" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/user-auth.css" />
+</head>
+
+<body>
+  <section class="user-form-part">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-12 col-lg-8 col-xl-8">
+          <div class="user-form-logo">
+            <a th:href="@{/}"><img src="/static/assets/img/XanhShop3.png" alt="logo" /></a>
+          </div>
+          <div class="user-form-card">
+            <div class="user-form-title">
+              <div class="user-form-avatar"><img alt="image-avatar" src="/static/assets/img/imageAvt.jpg"></div>
+              <h2>Đổi Mật Khẩu!</h2>
+              <p class="mb-5">Thay đổi mật khẩu định kỳ để bảo vệ tài khoản của bạn.</p>
+            </div>
+            <div class="user-form-group">
+              <form class="user-form">
+                <!--Thông báo lỗi-->
+                <div id="userName-pass-notfound-error" class="alert alert-danger" style="display:none;">
+                  <span>Tài khoản hoặc mật khẩu khồn chính xác!.</span>
+                </div>
+                <!-- Thông báo khi đăng nhập thành công -->
+                <div id="changePass-success" class="alert alert-success" style="display: none;">
+                  Đổi mật khẩu thành công!
+                </div>
+                <br>
+
+                <div class="form-group">
+                  <input type="text" id="userName" class="form-control" placeholder="UserName" autocomplete="off"
+                    required="required" />
+                  <div id="userName-error" class="alert alert-danger" style="display:none;">UserName không được để trống
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <input type="password" class="form-control" id="currentPassword" name="currentPassword"
+                    placeholder="Mật khẩu hiện tại" required="required" />
+                  <div id="curPassword-error" class="alert alert-danger" style="display:none;">Mật khẩu không được để
+                    trống
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <input type="password" class="form-control" id="newPassword" name="newPassword"
+                    placeholder="Mật khẩu mới" required="required" />
+                  <div id="newPassword-error" class="alert alert-danger" style="display:none;">Mật khẩu mới không được
+                    để trống
+                  </div>
+                  <div id="newPassword-6char-error" class="alert alert-danger" style="display:none;">Mật khẩu mới yêu
+                    cầu từ 6 ký tự trở lên!
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                    placeholder="Nhập lại mật khẩu mới" required="required" />
+                  <div id="confirmPassword-error" class="alert alert-danger" style="display:none;">Nhập lại mật khẩu
+                    không được để trống
+                  </div>
+                  <div id="confirmPassword-not-error" class="alert alert-danger" style="display:none;">Mật khẩu nhập lại
+                    không trùng khớp!
+                  </div>
+                </div>
+
+                <div class="form-check mb-3">
+                  <input class="form-check-input" id="check" type="checkbox" value="" onclick="hidePass()" />
+                  <label class="form-check-label" for="check">Hiển thị mật khẩu</label>
+                </div>
+
+                <div class="form-button">
+                  <button type="submit" id="changePass-button">Đổi Mật Khẩu</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <!--Xử lý đổi mật khẩu-->
+          <script>
+            document.getElementById('changePass-button').addEventListener('click', async function (event) {
+              event.preventDefault(); // Ngăn chặn form reload lại trang
+              hideErrorMessages();
+              const userName = document.getElementById('userName').value;
+              const currentPassword = document.getElementById('currentPassword').value;
+              const newPassword = document.getElementById('newPassword').value;
+              const confirmPassword = document.getElementById('confirmPassword').value;
+
+              // Kiểm tra xem email có rỗng không
+              if (!userName) {
+                document.getElementById('userName-error').style.display = 'block';
+                return;
+              }
+              if (!currentPassword) {
+                document.getElementById('curPassword-error').style.display = 'block';
+                return;
+              }
+              if (!newPassword) {
+                document.getElementById('newPassword-error').style.display = 'block';
+                return;
+              }
+              if (!confirmPassword) {
+                document.getElementById('confirmPassword-error').style.display = 'block';
+                return;
+              }
+
+              // Ẩn thông báo lỗi trước đó (nếu có)
+              function hideErrorMessages() {
+                document.getElementById('userName-error').style.display = 'none';
+                document.getElementById('curPassword-error').style.display = 'none';
+                document.getElementById('newPassword-error').style.display = 'none';
+                document.getElementById('confirmPassword-error').style.display = 'none';
+                document.getElementById('newPassword-6char-error').style.display = 'none';
+                document.getElementById('confirmPassword-not-error').style.display = 'none';
+                document.getElementById('userName-pass-notfound-error').style.display = 'none';
+              }
+
+              try {
+                const response = await fetch('http://localhost:9056/user-service/api/account/change-password', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userName: userName, currentPassword: currentPassword, newPassword: newPassword, confirmPassword: confirmPassword })
+                });
+
+                if (response.ok) {
+                  // Hiển thị thông báo thành công
+                  document.getElementById('changePass-success').style.display = 'block';
+                } else {
+                  // Nếu server trả về lỗi
+                  const errorData = await response.json();
+                  //document.getElementById('email_error').style.display = 'block';
+                  if (errorData.message === 'UserName not found.') {
+                    document.getElementById('userName-pass-notfound-error').style.display = 'block';
+                  }else if(errorData.message === 'Current password is incorrect.'){
+                    document.getElementById('userName-pass-notfound-error').style.display = 'block';
+                  }else if(errorData.message === 'New password must be at least 6 characters long.'){
+                    document.getElementById('newPassword-6char-error').style.display = 'block';
+                  }else if(errorData.message === 'New password and confirm password do not match.'){
+                    document.getElementById('confirmPassword-not-error').style.display = 'block';
+                  }
+                }
+              } catch (error) {
+                console.error('Lỗi trong quá trình đặt lại mật khẩu:', error);
+                alert("Đã có lỗi xảy ra. Vui lòng thử lại.");
+              }
+            });
+          </script>
+          <div class="user-form-remind">
+            <p>Bạn đã có tài khoản?<a href="/templates/web/login.html">Đăng nhập tại đây</a></p>
+          </div>
+          <div class="user-form-footer">
+            <p>Greeny | &COPY; Developer by <a href="javascript:void(0);">Hải Đức</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    function hidePass() {
+      var x = document.getElementById("currentPassword");
+      if (x.type === "password") {
+        x.type = "text";
+      } else {
+        x.type = "password";
+      }
+    }
+  </script>
+
+  <script src="vendor/bootstrap/jquery-1.12.4.min.js"></script>
+  <script src="vendor/bootstrap/popper.min.js"></script>
+  <script src="vendor/bootstrap/bootstrap.min.js"></script>
+  <script src="vendor/countdown/countdown.min.js"></script>
+  <script src="vendor/niceselect/nice-select.min.js"></script>
+  <script src="vendor/slickslider/slick.min.js"></script>
+  <script src="vendor/venobox/venobox.min.js"></script>
+  <script src="js/nice-select.js"></script>
+  <script src="js/countdown.js"></script>
+  <script src="js/accordion.js"></script>
+  <script src="js/venobox.js"></script>
+  <script src="js/slick.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>

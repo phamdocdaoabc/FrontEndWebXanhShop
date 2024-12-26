@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="author" content="mironcoder" />
+  <meta name="email" content="mironcoder@gmail.com" />
+  <meta name="profile" content="https://themeforest.net/user/mironcoder" />
+  <meta name="template" content="greeny" />
+  <meta name="title" content="greeny - Ecommerce Food Store HTML Template" />
+  <meta name="keywords"
+    content="organic, food, shop, ecommerce, store, html, bootstrap, template, agriculture, vegetables, products, farm, grocery, natural, online" />
+  <title>Thế giới nông sản</title>
+  <link rel="icon" href="static/images/logo/XanhShop.png" />
+  <link rel="stylesheet" href="/static/fonts/flaticon/flaticon.css" />
+  <link rel="stylesheet" href="/static/fonts/icofont/icofont.min.css" />
+  <link rel="stylesheet" href="/static/fonts/fontawesome/fontawesome.min.css" />
+  <link rel="stylesheet" href="/static/vendor/venobox/venobox.min.css" />
+  <link rel="stylesheet" href="/static/vendor/slickslider/slick.min.css" />
+  <link rel="stylesheet" href="/static/vendor/niceselect/nice-select.min.css" />
+  <link rel="stylesheet" href="/static/vendor/bootstrap/bootstrap.min.css" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/user-auth.css" />
+</head>
+
+<body>
+  <section class="user-form-part">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-12 col-lg-8 col-xl-8">
+          <div class="user-form-logo">
+            <a th:href="@{/}"><img src="/static/assets/img/XanhShop3.png" alt="logo" /></a>
+          </div>
+          <div class="user-form-card">
+            <div class="user-form-title">
+              <div class="user-form-avatar"><img alt="image-avatar" src="/static/assets/img/imageAvt.jpg"></div>
+              <h2>Đăng nhập!</h2>
+              <p>Sử Dụng Thông Tin Đăng Nhập Của Bạn Để Truy Cập</p>
+              <br>
+              <div class="alert alert-success" role="alert"></div>
+            </div>
+
+            <div class="user-form-group">
+              <form id="login-form" class="user-form">
+
+                <!-- Thông báo lỗi -->
+                <div id="account-locked-error" class="alert alert-danger" style="display:none;">
+                  <span>Tài khoản của bạn đã bị khóa. Vui lòng liên hệ với quản trị viên để biết thêm chi tiết.</span>
+                </div>
+
+                <div id="login-error" class="alert alert-danger" style="display:none;">
+                  <span>Tài khoản hoặc mật khẩu không chính xác!</span>
+                </div>               
+                <!-- Thông báo khi đăng nhập thành công -->
+                <div id="login-success" class="alert alert-success" style="display: none;">
+                  Chúc mừng bạn đã đăng nhập thành công!
+                </div>
+                <br>
+                <!-- Input userName -->
+                <div class="form-group">
+                  <input type="text" name="username" class="form-control" id="username" placeholder="UserName"
+                    autocomplete="off" required />
+                  <div id="userName-error" class="alert alert-danger" style="display:none;">UserName không được để trống
+                  </div>
+                </div>
+
+                <!-- Input password -->
+                <div class="form-group">
+                  <input type="password" name="password" class="form-control" id="password" placeholder="Mật khẩu"
+                    required />
+                  <div id="password-error" class="alert alert-danger" style="display:none;">Mật khẩu không được để trống
+                  </div>
+                </div>
+
+                <!-- Checkbox: Hiển thị mật khẩu -->
+                <div class="form-check mb-3 flex_login">
+                  <div>
+                    <input class="form-check-input" type="checkbox" id="show-password" />
+                    <label class="form-check-label" for="show-password">Hiển thị mật khẩu</label>
+                  </div>
+
+                  <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                    <label class="form-check-label" for="remember">Nhớ tôi</label>
+                  </div>
+                </div>
+
+                <!-- Nút đăng nhập -->
+                <div class="form-button">
+                  <button type="button" id="login-button">Đăng nhập</button>
+                  <p>
+                    <a href="/templates/web/forgotPassword.html">Quên Mật Khẩu?</a>
+                  </p>
+                </div>
+              </form>
+            </div>
+           
+            <!-- Xử lý login -->
+            <script>
+              document.getElementById('login-button').addEventListener('click', async function () {
+                const userName = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // Kiểm tra dữ liệu đầu vào
+                if (!userName) {
+                  document.getElementById('userName-error').style.display = 'block';
+                  return;
+                }
+                if (!password) {
+                  document.getElementById('password-error').style.display = 'block';
+                  return;
+                }
+
+                // Ẩn các lỗi trước đó (nếu có)
+                document.getElementById('userName-error').style.display = 'none';
+                document.getElementById('password-error').style.display = 'none';
+                document.getElementById('account-locked-error').style.display = 'none';
+                document.getElementById('login-error').style.display = 'none';
+
+                // Gửi request đến API
+                try {
+                  const response = await fetch('http://localhost:9056/user-service/api/account/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userName: userName, password: password })
+                  });
+
+                  if (response.ok) {
+                    const data = await response.json();
+                    // Lưu token vào localStorage
+                    localStorage.setItem('token', data.token);
+                    // Hiển thị thông báo thành công
+                    document.getElementById("login-success").style.display = "block";
+                    // Phân quyền dựa trên role
+                    if (data.role === 'ROLE_ADMIN') {
+                      setTimeout(() => window.location.href = '/templates/admin/index.html', 1000); // Điều hướng tới trang admin
+                    } else if (data.role === 'ROLE_USER') {
+                      setTimeout(() => window.location.href = '/templates/web/home.html', 1000); // Điều hướng tới trang user
+                    }
+                  } else {
+                    const errorData = await response.json();
+                    // Hiển thị lỗi từ response khi login không thành công
+                    if (errorData.message === 'Account is not activated. Please check your email for activation.') {
+                      document.getElementById('account-locked-error').style.display = 'block';
+                    } else if (errorData.message === 'Sorry, Your account has been locked.') {
+                      document.getElementById('account-locked-error').style.display = 'block';
+                    } else if (errorData.message === 'Invalid username or password.') {
+                      document.getElementById('login-error').style.display = 'block';
+                    } else {
+                      alert("Đã có lỗi xảy ra. Vui lòng thử lại.");
+                    }
+                  }
+                } catch (error) {
+                  console.error("Lỗi đăng nhập:", error);
+                  alert("Đã có lỗi xảy ra. Vui lòng thử lại.");
+                }
+              });
+
+              // Hiển thị/Ẩn mật khẩu
+              document.getElementById('show-password').addEventListener('change', function () {
+                const passwordInput = document.getElementById('password');
+                passwordInput.type = this.checked ? 'text' : 'password';
+              });
+            </script>
+
+            <div class="form-button">
+              <p>
+                Bạn chưa có tài khoản? <a href="/templates/web/register.html">Đăng Ký Ngay</a>
+              </p>
+              <p>
+                <a href="/templates/web/changePass.html">Đổi Mật Khẩu</a>
+              </p>
+            </div>
+            <div class="user-form-footer">
+              <p> Developer by <a href="javascript:void(0);">Hải Đức</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+  </section>
+
+  <script>
+    function hidePass() {
+      var x = document.getElementById("myPass");
+      if (x.type === "password") {
+        x.type = "text";
+      } else {
+        x.type = "password";
+      }
+    }
+  </script>
+  <script src="/static/vendor/bootstrap/jquery-1.12.4.min.js"></script>
+  <script src="/static/vendor/bootstrap/popper.min.js"></script>
+  <script src="/static/vendor/bootstrap/bootstrap.min.js"></script>
+  <script src="/static/vendor/countdown/countdown.min.js"></script>
+  <script src="/static/vendor/niceselect/nice-select.min.js"></script>
+  <script src="/static/vendor/slickslider/slick.min.js"></script>
+  <script src="/static/vendor/venobox/venobox.min.js"></script>
+  <script src="/static/js/nice-select.js"></script>
+  <script src="/static/js/countdown.js"></script>
+  <script src="/static/js/accordion.js"></script>
+  <script src="/static/js/venobox.js"></script>
+  <script src="/static/js/slick.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="author" content="mironcoder" />
+  <meta name="email" content="mironcoder@gmail.com" />
+  <meta name="profile" content="https://themeforest.net/user/mironcoder" />
+  <meta name="template" content="greeny" />
+  <meta name="title" content="greeny - Ecommerce Food Store HTML Template" />
+  <meta name="keywords"
+    content="organic, food, shop, ecommerce, store, html, bootstrap, template, agriculture, vegetables, products, farm, grocery, natural, online" />
+  <title>Thế giới nông sản</title>
+  <link rel="icon" href="/images/logo/logoWeb.png" />
+  <link rel="stylesheet" href="/static/fonts/flaticon/flaticon.css" />
+  <link rel="stylesheet" href="/static/fonts/icofont/icofont.min.css" />
+  <link rel="stylesheet" href="/static/fonts/fontawesome/fontawesome.min.css" />
+  <link rel="stylesheet" href="/static/vendor/venobox/venobox.min.css" />
+  <link rel="stylesheet" href="/static/vendor/slickslider/slick.min.css" />
+  <link rel="stylesheet" href="/static/vendor/niceselect/nice-select.min.css" />
+  <link rel="stylesheet" href="/static/vendor/bootstrap/bootstrap.min.css" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/user-auth.css" />
+</head>
+
+<body>
+  <section class="user-form-part">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-12 col-lg-8 col-xl-8">
+          <div class="user-form-logo">
+            <a th:href="@{/}"><img src="/static/assets/img/XanhShop3.png" alt="logo" /></a>
+          </div>
+          <div class="user-form-card">
+            <div class="user-form-title">
+              <div class="user-form-avatar"><img alt="image-avatar" src="/static/assets/img/imageAvt.jpg"></div>
+              <h2>Đăng Ký Ngay!</h2>
+              <p class="mb-5">Thiết Lập Một Tài Khoản Mới</p>
+            </div>
+            <div class="user-form-group">
+              <form class="user-form">
+                <!-- Thông báo lỗi -->
+                <div id="duplicate-username-error" class="alert alert-danger" style="display:none;">
+                  <span>UserName đã có người sử dụng. Vui lòng chọn userName khác!</span>
+                </div>
+                <div id="duplicate-email_error" class="alert alert-danger" style="display:none;">
+                  <span>Email đã được đăng ký!</span>
+                </div>
+                <!-- Thông báo khi đăng nhập thành công -->
+                <div id="register-success" class="alert alert-success" style="display: none;">
+                  Chúc mừng bạn đã đăng ký thành công, vui lòng truy cập vào email để xác thực tài khoản.
+                </div>
+                <br>
+
+                <div class="form-group">
+                  <input type="email" id="email" class="form-control" placeholder="Địa chỉ Email" autocomplete="off"
+                    required="required" />
+                  <div id="email-error" class="alert alert-danger" style="display:none;">email không được để trống
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <input type="text" id="userName" class="form-control" placeholder="UserName" autocomplete="off"
+                    required="required" />
+                  <div id="userName-error" class="alert alert-danger" style="display:none;">UserName không được để trống
+                  </div>
+                  <div id="userName-6char-error" class="alert alert-danger" style="display:none;">UserName yêu cầu 6 ký
+                    tự trở lên
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <input type="password" class="form-control" id="myPass" name="password" placeholder="Mật khẩu"
+                    required="required" />
+                  <div id="password-error" class="alert alert-danger" style="display:none;">password không được để trống
+                  </div>
+                  <div id="password-6char-error" class="alert alert-danger" style="display:none;">password yêu cầu 6 ký
+                    tự trở lên
+                  </div>
+                </div>
+
+                <div class="form-check mb-3">
+                  <input class="form-check-input" id="show-password" type="checkbox" onclick="hidePass()" />
+                  <label class="form-check-label" for="show-password">Hiển thị mật khẩu</label>
+                </div>
+                <div class="form-button">
+                  <button type="submit" id="register-button">Đăng Ký</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="user-form-remind">
+            <p>Bạn đã có tài khoản?<a href="/templates/web/login.html">Đăng nhập tại đây</a></p>
+          </div>
+          <div class="user-form-footer">
+            <p>Greeny | &COPY; Developer by <a href="javascript:void(0);">Hải Đức</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- xử lý đăng Ký -->
+  <script>
+    document.querySelector('.user-form').addEventListener('submit', async function (event) {
+      event.preventDefault(); // Ngăn reload trang
+      hideErrorMessages();
+      const email = document.getElementById('email').value;
+      const userName = document.getElementById('userName').value;
+      const password = document.getElementById('myPass').value;
+
+      // Kiểm tra dữ liệu đầu vào
+      if (!email) {
+        document.getElementById('email-error').style.display = 'block';
+        return;
+      }
+      if (!userName) {
+        document.getElementById('userName-error').style.display = 'block';
+        return;
+      }
+      if (!password) {
+        document.getElementById('password-error').style.display = 'block';
+        return;
+      }
+
+      // Ẩn các lỗi trước đó (nếu có)
+      function hideErrorMessages() {
+        document.getElementById('email-error').style.display = 'none';
+        document.getElementById('userName-error').style.display = 'none';
+        document.getElementById('password-error').style.display = 'none';
+        document.getElementById('duplicate-username-error').style.display = 'none';
+        document.getElementById('duplicate-email_error').style.display = 'none';
+        document.getElementById('userName-6char-error').style.display = 'none';
+        document.getElementById('password-6char-error').style.display = 'none';
+      }
+
+      // Gửi request đến API
+      try {
+        const response = await fetch('http://localhost:9056/user-service/api/account/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: userName, password: password, email: email })
+        });
+
+        if (!response.ok) {
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const errorData = await response.json();
+            // Kiểm tra và hiển thị các lỗi cụ thể
+            if (errorData.message === 'Email already exists.') {
+              document.getElementById('duplicate-email_error').style.display = 'block';
+            } else if (errorData.message === 'Username already exists.') {
+              document.getElementById('duplicate-username-error').style.display = 'block';
+            } else if (errorData.message === 'New userName must be at least 6 characters long.') {
+              document.getElementById('userName-6char-error').style.display = 'block';
+            } else if (errorData.message === 'New password must be at least 6 characters long.') {
+              document.getElementById('password-6char-error').style.display = 'block';
+            } else {
+              alert("Đã có lỗi xảy ra. Vui lòng thử lại.");
+            }
+          } else {
+            console.error('Phản hồi không phải JSON:', await response.text());
+            alert("Đã có lỗi xảy ra. Vui lòng thử lại.");
+          }
+        } else {
+          // Hiển thị thông báo thành công
+          document.getElementById("register-success").style.display = "block";
+        }
+      } catch (error) {
+        console.error("Lỗi đăng ký:", error);
+        alert("Đã có lỗi xảy ra. Vui lòng thử lại.");
+      }
+    });
+  </script>
+  <!-- xử lý hiển thị password -->
+  <script>
+    function hidePass() {
+      var x = document.getElementById("myPass");
+      if (x.type === "password") {
+        x.type = "text";
+      } else {
+        x.type = "password";
+      }
+    }
+  </script>
+
+  <script src="vendor/bootstrap/jquery-1.12.4.min.js"></script>
+  <script src="vendor/bootstrap/popper.min.js"></script>
+  <script src="vendor/bootstrap/bootstrap.min.js"></script>
+  <script src="vendor/countdown/countdown.min.js"></script>
+  <script src="vendor/niceselect/nice-select.min.js"></script>
+  <script src="vendor/slickslider/slick.min.js"></script>
+  <script src="vendor/venobox/venobox.min.js"></script>
+  <script src="js/nice-select.js"></script>
+  <script src="js/countdown.js"></script>
+  <script src="js/accordion.js"></script>
+  <script src="js/venobox.js"></script>
+  <script src="js/slick.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>
