@@ -1,126 +1,235 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta charset="UTF-8" />
 	<title>Greenty - Trang quản trị</title>
 	<meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
-	<link rel="icon" href="/assets/img/icon.ico" type="image/x-icon"/>
-	
+	<link rel="icon" href="/assets/img/icon.ico" type="image/x-icon" />
+
 	<!-- Fonts and icons -->
-	<script src="/assets/js/plugin/webfont/webfont.min.js"></script>
+	<script src="/static/assets/js/plugin/webfont/webfont.min.js"></script>
 	<script>
 		WebFont.load({
-			google: {"families":["Lato:300,400,700,900"]},
-			custom: {"families":["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['/assets/css/fonts.min.css']},
-			active: function() {
+			google: { "families": ["Lato:300,400,700,900"] },
+			custom: { "families": ["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['/static/assets/css/fonts.min.css'] },
+			active: function () {
 				sessionStorage.fonts = true;
 			}
 		});
 	</script>
 
 	<!-- CSS Files -->
-	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-	<link rel="stylesheet" href="/assets/css/atlantis.min.css">
+	<link rel="stylesheet" href="/static/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/static/assets/css/atlantis.min.css">
 	<!-- CSS Just for demo purpose, don't include it in your project -->
-	<link rel="stylesheet" href="/assets/css/demo.css">
+	<link rel="stylesheet" href="/static/assets/css/demo.css">
 </head>
+
 <body>
 	<div class="wrapper">
-	<!-- Header -->
-	
-	<th:block th:replace="~{admin/fragments/header :: header}"></th:block>
-	
-	<!-- End Header -->
-	
-	<!-- Navbar -->
-	
-	<th:block th:replace="~{admin/fragments/navbar :: navbar}"></th:block>
-	
-	<!-- End Navbar -->
-		
-	<div class="main-panel">
-		<div class="content">
-			<div class="page-inner">
-				<div class="page-header">
-					<h4 class="page-title text-success">Quản Lý Đơn Hàng</h4>
-					<ul class="breadcrumbs">
-						<li class="nav-home">
-							<a href="#">
-								<i class="flaticon-home"></i>
-							</a>
-						</li>
-						<li class="separator">
-							<i class="flaticon-right-arrow"></i>
-						</li>
-						<li class="nav-item">
-							<a th:href="@{/admin/home}">Trang chủ</a>
-						</li>
-						<li class="separator">
-							<i class="flaticon-right-arrow"></i>
-						</li>
-						<li class="nav-item">
-							<a href="#">Quản lý đơn hàng</a>
-						</li>
-					</ul>
-				</div>
+		<!-- Header -->
+		<header id="header-placeholder"></header>
+		<script>
+			// Load nội dung từ header.html
+			fetch('fragments/header.html')
+				.then(response => response.text())
+				.then(data => {
+					document.getElementById('header-placeholder').innerHTML = data;
+				})
+				.catch(error => console.error('Error loading header:', error));
+		</script>
+		<!-- End Header -->
+
+		<!-- Navbar -->
+		<header id="navbar-placeholder"></header>
+		<script>
+			function loadAdminProfile() {
+				const token = localStorage.getItem('token'); // Lấy token từ localStorage
+				console.log('Token:', token); // Hiển thị token ra console
+
+				// Lấy phần tử chứa thông tin user
+				const userProfileElement = document.getElementById('user-profile');
+				const userNameElement = document.getElementById('user-name');
+				const userAvatarElement = document.getElementById('user-avatar');
+
+				// Kiểm tra nếu không có token
+				if (!token) {
+					console.error('Bạn chưa đăng nhập!');
+					userProfileElement.style.display = 'none'; // Ẩn avatar và userName
+					return;
+				}
+
+				// Gọi API để lấy thông tin người dùng
+				fetch('http://localhost:9056/user-service/api/profile/infor', {
+					method: 'GET',
+					headers: { 'Authorization': 'Bearer ' + token }
+				})
+					.then(response => {
+						if (!response.ok) {
+							throw new Error('Không thể tải thông tin người dùng!');
+						}
+						return response.json();
+					})
+					.then(data => {
+						console.log('Thông tin người dùng:', data);
+
+						// Hiển thị thông tin người dùng
+						if (data.fullName) {
+							userNameElement.textContent = data.fullName;
+						} else {
+							userNameElement.textContent = "Admin";
+						}
+
+						// Hiển thị avatar
+						if (data.imageUrl) {
+							userAvatarElement.src = "data:image/png;base64," + data.imageUrl;
+						} else {
+							userAvatarElement.src = '/static/images/user.png'; // Avatar mặc định
+						}
+
+						// Hiển thị phần tử sau khi có dữ liệu
+						userProfileElement.style.display = 'block';
+					})
+					.catch(error => {
+						console.error('Lỗi khi tải thông tin người dùng:', error);
+						userAvatarElement.src = '/static/images/user.png'; // Avatar mặc định khi lỗi
+						userProfileElement.style.display = 'none'; // Ẩn thông tin nếu xảy ra lỗi
+					});
+			}
+			// Load nội dung từ navbar.html
+			fetch('fragments/navbar.html')
+				.then(response => response.text())
+				.then(data => {
+					document.getElementById('navbar-placeholder').innerHTML = data;
+					loadAdminProfile();
+				})
+				.catch(error => console.error('Error loading navbar:', error));
+		</script>
+		<!-- End Navbar -->
+
+		<div class="main-panel">
+			<div class="content">
+				<div class="page-inner">
+					<div class="page-header">
+						<h4 class="page-title text-success">Quản Lý Đơn Hàng</h4>
+						<ul class="breadcrumbs">
+							<li class="nav-home">
+								<a href="#">
+									<i class="flaticon-home"></i>
+								</a>
+							</li>
+							<li class="separator">
+								<i class="flaticon-right-arrow"></i>
+							</li>
+							<li class="nav-item">
+								<a th:href="@{/admin/home}">Trang chủ</a>
+							</li>
+							<li class="separator">
+								<i class="flaticon-right-arrow"></i>
+							</li>
+							<li class="nav-item">
+								<a href="#">Quản lý đơn hàng</a>
+							</li>
+						</ul>
+					</div>
 					<div class="col-md-12">
 						<div class="card">
 							<div class="card-header">
 								<div class="d-flex align-items-center">
 									<h4 class="card-title" style="text-decoration: underline;">Chi tiết đơn hàng</h4>
-										<a  class="btn btn-primary btn-round ml-auto" th:href="@{/admin/orders}">Quay lại</a>
+									<a class="btn btn-primary btn-round ml-auto" href="orders.html">Quay lại</a>
 								</div>
 							</div>
 							<div class="card-body">
-							
-								<div class="alert alert-success row col-12"
-									th:if="${message}" th:text="${message}">
+
+								<div class="alert alert-success row col-12" th:if="${message}" th:text="${message}">
 								</div>
 								<div class="table-responsive">
-									<table id="add-row" class="display table table-striped table-hover" >
+									<table id="add-row" class="display table table-striped table-hover">
 										<thead>
 											<tr>
 												<th width="8%">STT</th>
 												<th>Sản phẩm</th>
-						                        <th>Tên sản phẩm</th>
-						                        <th>Số lượng</th>
-						                        <th>Đơn giá</th>
-						                        <th>Tổng tiền</th>
+												<th>Tên sản phẩm</th>
+												<th>Số lượng</th>
+												<th>Đơn giá</th>
+												<th>Tổng tiền</th>
 											</tr>
 										</thead>
 										<tfoot>
 											<tr>
 												<th width="8%">STT</th>
 												<th>Sản phẩm</th>
-						                        <th>Tên sản phẩm</th>
-						                        <th>Số lượng</th>
-						                        <th>Đơn giá</th>
-						                        <th>Tổng tiền</th>
+												<th>Tên sản phẩm</th>
+												<th>Số lượng</th>
+												<th>Đơn giá</th>
+												<th>Tổng tiền</th>
 											</tr>
 										</tfoot>
-										<tbody>
-											<tr th:each="item, count : ${orderDetail}">
-						                        <td class="text-center" th:text="${count.index+1}"></td>
-						                        <td>
-													<img th:src="@{'/loadImage?imageName='+${item.product.productImage}}" width="80px" alt="product" />
-												</td>
-						                        <td>[[${item.product.productName}]]</td>
-						                        <td>[[${item.quantity}]]</td>
-						                        <td>[[${#numbers.formatDecimal(item.price - (item.price * item.product.discount/100), 1, 'DEFAULT', 0, 'DEFAULT')}+ ' đ']]</td>
-						                        <td>[[${#numbers.formatDecimal((item.price - (item.price * item.product.discount/100)) * item.quantity, 1, 'DEFAULT', 0, 'DEFAULT')}+ ' đ']]</td>
-						                    </tr>
+										<tbody id="order-details-body">
+											<!--Hiển thị list-->
 										</tbody>
 									</table>
-									
 									<script>
-									function showConfigModalDialog(id, name) {
-										$('#name').text(name);
-										$('#yesOption').attr('href', '/admin/delete/'+id);
-										$('#configmationId').modal('show');
-									}
+										document.addEventListener("DOMContentLoaded", function () {
+											const orderDetailsBody = document.getElementById("order-details-body");
+
+											// Lấy orderId từ URL
+											const urlParams = new URLSearchParams(window.location.search);
+											const orderId = urlParams.get("orderId");								
+
+											if (!orderId) {
+												alert("Không tìm thấy orderId trong URL.");
+												return;
+											}
+
+											// Gọi API để lấy thông tin sản phẩm
+											fetch(`http://localhost:9056/shipping-service/api/shippings/${orderId}/products`)
+												.then(response => {
+													if (!response.ok) throw new Error("Không thể tải thông tin sản phẩm.");
+													return response.json();
+												})
+												.then(data => {
+													renderOrderDetails(data);
+												})
+												.catch(error => {
+													console.error("Lỗi:", error);
+													alert("Có lỗi xảy ra khi lấy dữ liệu sản phẩm.");
+												});
+
+											// Hàm hiển thị dữ liệu vào bảng
+											function renderOrderDetails(products) {
+												orderDetailsBody.innerHTML = ""; // Xóa nội dung cũ
+
+												products.forEach((item, index) => {													
+													const row = `
+																	<tr>
+																		<td class="text-center">${index + 1}</td>
+																		<td>
+																			<img src="${item.imageUrl}" width="120px" alt="product" />
+																		</td>
+																		<td>${item.name}</td>
+																		<td>${item.quantity}</td>
+																		<td>${item.price} đ</td>
+																		<td>${item.totalPrice} đ</td>
+																	</tr>
+																`;
+													orderDetailsBody.insertAdjacentHTML("beforeend", row);
+												});
+											}
+										});
+
 									</script>
 									
+									<script>
+										function showConfigModalDialog(id, name) {
+											$('#name').text(name);
+											$('#yesOption').attr('href', '/admin/delete/' + id);
+											$('#configmationId').modal('show');
+										}
+									</script>
 									<!-- Modal -->
 									<div class="modal" tabindex="-1" role="dialog" id="configmationId">
 										<div class="modal-dialog" role="document">
@@ -149,80 +258,80 @@
 					</div>
 				</div>
 			</div>
-		<footer class="footer">
-			<div class="container-fluid">
-				<nav class="pull-left">
-					<ul class="nav">
-						<li class="nav-item">
-							<a class="nav-link" href="#">
-								Pavshop
-							</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="#">
-								Help
-							</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="#">
-								Licenses
-							</a>
-						</li>
-					</ul>
-				</nav>
-				<div class="copyright ml-auto">
-					2024, made with <i class="fa fa-heart heart text-danger"></i> by <a href="">Pavshop</a>
-				</div>				
-			</div>
-		</footer>
-	</div>
-	
+			<footer class="footer">
+				<div class="container-fluid">
+					<nav class="pull-left">
+						<ul class="nav">
+							<li class="nav-item">
+								<a class="nav-link" href="#">
+									XANH-SHOP
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="#">
+									Help
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="#">
+									Licenses
+								</a>
+							</li>
+						</ul>
+					</nav>
+					<div class="copyright ml-auto">
+						2024, made with <i class="fa fa-heart heart text-danger"></i> by <a href="">XANH-SHOP</a>
+					</div>
+				</div>
+			</footer>
+		</div>
+
 		<!-- End Custom template -->
 	</div>
 	<!--   Core JS Files   -->
-	<script src="/assets/js/core/jquery.3.2.1.min.js"></script>
-	<script src="/assets/js/core/popper.min.js"></script>
-	<script src="/assets/js/core/bootstrap.min.js"></script>
+	<script src="/static/assets/js/core/jquery.3.2.1.min.js"></script>
+	<script src="/static/assets/js/core/popper.min.js"></script>
+	<script src="/static/assets/js/core/bootstrap.min.js"></script>
 	<!-- jQuery UI -->
-	<script src="/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
-	<script src="/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
-	
+	<script src="/static/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+	<script src="/static/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+
 	<!-- jQuery Scrollbar -->
-	<script src="/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+	<script src="/static/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
 	<!-- Datatables -->
-	<script src="/assets/js/plugin/datatables/datatables.min.js"></script>
+	<script src="/static/assets/js/plugin/datatables/datatables.min.js"></script>
 	<!-- Atlantis JS -->
-	<script src="/assets/js/atlantis.min.js"></script>
+	<script src="/static/assets/js/atlantis.min.js"></script>
 	<!-- Atlantis DEMO methods, don't include it in your project! -->
-	<script src="/assets/js/setting-demo2.js"></script>
-	<script >
-		$(document).ready(function() {
+	<script src="/static/assets/js/setting-demo2.js"></script>
+	<script>
+		$(document).ready(function () {
 			$('#basic-datatables').DataTable({
 			});
 
-			$('#multi-filter-select').DataTable( {
+			$('#multi-filter-select').DataTable({
 				"pageLength": 5,
 				initComplete: function () {
-					this.api().columns().every( function () {
+					this.api().columns().every(function () {
 						var column = this;
 						var select = $('<select class="form-control"><option value=""></option></select>')
-						.appendTo( $(column.footer()).empty() )
-						.on( 'change', function () {
-							var val = $.fn.dataTable.util.escapeRegex(
-								$(this).val()
+							.appendTo($(column.footer()).empty())
+							.on('change', function () {
+								var val = $.fn.dataTable.util.escapeRegex(
+									$(this).val()
 								);
 
-							column
-							.search( val ? '^'+val+'$' : '', true, false )
-							.draw();
-						} );
+								column
+									.search(val ? '^' + val + '$' : '', true, false)
+									.draw();
+							});
 
-						column.data().unique().sort().each( function ( d, j ) {
-							select.append( '<option value="'+d+'">'+d+'</option>' )
-						} );
-					} );
+						column.data().unique().sort().each(function (d, j) {
+							select.append('<option value="' + d + '">' + d + '</option>')
+						});
+					});
 				}
-			});	
+			});
 
 			// Add Row
 			$('#add-row').DataTable({
@@ -241,28 +350,28 @@
 				$('#addRowModal').modal('hide');
 
 			}); */
-			
-			 $('#editRowButton').click(function(event) {
+
+			$('#editRowButton').click(function (event) {
 				/* $('#edit-row').dataTable().fnAddData([
 					$("#categoryId").val(category.categoryId),
 					$("#name").val(category.name),
 					action
 					]);
 				$('#editRowModal').modal('hide'); */
-				
+
 				event.preventDefault();
-				
-				var href= $(this).attr('href');
-				
-				$.get(href, function(category){
+
+				var href = $(this).attr('href');
+
+				$.get(href, function (category) {
 					$('#categoryId').val(category.categoryId);
 					$('#name').val(category.name);
 				})
-				
-				$('#editRowModal').modal();	
 
-			}); 
-			
+				$('#editRowModal').modal();
+
+			});
+
 			/* $('.table .btn').on('click', function(event){
 				
 				event.preventDefault();
@@ -276,10 +385,11 @@
 				
 				$('#editRowModal').modal();
 			}); */
-			
+
 		});
-		
-		
+
+
 	</script>
 </body>
+
 </html>

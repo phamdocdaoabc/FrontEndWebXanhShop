@@ -123,29 +123,29 @@
       } else {
         emptyCartMessage.style.display = 'none';
         cartList.innerHTML = cartItems.map(item => `
-                  <li class="cart-item" id="cart-item-${item.productId}">
-                					<div class="cart-media">
-                    					<a href="/templates/web/productDetail.html?productId=${item.productId}">
-                        					<img src="${item.imageUrl}" alt="product" />
-                    					</a>
-                					</div>
-                					<div class="cart-info-group">
-                    					<div class="cart-info">
-                        					<h6><label>Tên sản phẩm :</label> <a href="/templates/web/productDetail.html?productId=${item.productId}" style="color: #119744">${item.productName}</a></h6>
-                        						<label>Đơn giá :</label>
-                        						<p>${formatCurrency(item.price - item.price * (item.discount / 100))} đ</p>
-                    							</div>
-                    					<div class="cart-action-group">
-                        					<div class="product-action">
-                            					<label>Số lượng : </label>
-                            					<input class="action-input" title="Quantity Number" type="number" min="1" value="${item.quantity}" style="font-weight: bold;"/>
-                        						</div>
-                        						<h6>${formatCurrency((item.price - item.price * (item.discount / 100)) * item.quantity)} đ</h6>
-                        						<button class="remove-item-btn" onclick="removeItemFromCart(${item.productId})">Xóa</button>
-                    							</div>
-                							</div>
-            					</li>
-        						`
+                 <li class="cart-item" id="cart-item-${item.productId}">
+                         <div class="cart-media">
+                             <a href="/templates/web/productDetail.html?productId=${item.productId}">
+                                 <img src="${item.imageUrl}" alt="product" />
+                             </a>
+                         </div>
+                         <div class="cart-info-group">
+                             <div class="cart-info">
+                                 <h6><label>Tên sản phẩm :</label> <a href="/templates/web/productDetail.html?productId=${item.productId}" style="color: #119744">${item.productName}</a></h6>
+                                   <label>Đơn giá :</label>
+                                   <p>${formatCurrency(item.price - item.price * (item.discount / 100))} đ</p>
+                                 </div>
+                             <div class="cart-action-group">
+                                 <div class="product-action">
+                                     <label>Số lượng : </label>
+                                     <input class="action-input" title="Quantity Number" type="number" min="1" value="${item.quantity}" style="font-weight: bold;"/>
+                                   </div>
+                                   <h6>${formatCurrency((item.price - item.price * (item.discount / 100)) * item.quantity)} đ</h6>
+                                   <button class="remove-item-btn" onclick="removeItemFromCart(${item.productId})">Xóa</button>
+                                 </div>
+                             </div>
+                     </li>
+                   `
         )
           .join('');
         cartFooter.style.display = 'block';
@@ -189,9 +189,9 @@
       } catch (error) {
         console.error('Lỗi khi tải giỏ hàng:', error);
         document.getElementById('emptyCartMessage').innerHTML = `
-                    <h4 style="color: #119744">Không thể tải thông tin giỏ hàng!</h4>
-                    <h5 style="color: #119744">Vui lòng thử lại sau!</h5>
-                `;
+                   <h4 style="color: #119744">Không thể tải thông tin giỏ hàng!</h4>
+                   <h5 style="color: #119744">Vui lòng thử lại sau!</h5>
+               `;
       }
     }
 
@@ -229,20 +229,56 @@
         .catch(error => console.error('Lỗi khi tải thông tin người dùng:', error));
       userProfileElement.style.display = 'none'; // Ẩn nếu có lỗi
     }
-    // Hiển thị nút
+
+    // Hiển thị nút menu Tài khoản
     function initHeaderScripts() {
       const token = localStorage.getItem('token');
 
-      if (token) {
-        document.getElementById('login-link').style.display = 'none';
-        document.getElementById('register-link').style.display = 'none';
-        document.getElementById('forgot-link').style.display = 'none';
-        document.getElementById('profile-link').style.display = 'block';
-        document.getElementById('logout-link').style.display = 'block';
-      } else {
+      // Nếu không có token, hiển thị các mục liên quan đến đăng nhập
+      if (!token) {
+        document.getElementById('login-link').style.display = 'block';
+        document.getElementById('register-link').style.display = 'block';
+        document.getElementById('forgot-link').style.display = 'block';
         document.getElementById('profile-link').style.display = 'none';
         document.getElementById('logout-link').style.display = 'none';
+        document.getElementById('admin-link').style.display = 'none';
+        return;
       }
+
+      // Gọi API để lấy thông tin người dùng
+      fetch('http://localhost:9056/user-service/api/profile/infor', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Không thể tải thông tin người dùng!');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Thông tin người dùng:', data);
+
+          // Hiển thị các mục dựa trên vai trò
+          if (data.role === "ROLE_ADMIN") {
+            document.getElementById('login-link').style.display = 'none';
+            document.getElementById('register-link').style.display = 'none';
+            document.getElementById('forgot-link').style.display = 'none';
+            document.getElementById('profile-link').style.display = 'block';
+            document.getElementById('logout-link').style.display = 'block';
+            document.getElementById('admin-link').style.display = 'block';
+          } else if (data.role === "ROLE_USER") {
+            document.getElementById('login-link').style.display = 'none';
+            document.getElementById('register-link').style.display = 'none';
+            document.getElementById('forgot-link').style.display = 'none';
+            document.getElementById('profile-link').style.display = 'block';
+            document.getElementById('logout-link').style.display = 'block';
+            document.getElementById('admin-link').style.display = 'none';
+          }
+        })
+        .catch(error => {
+          console.error('Lỗi khi tải thông tin người dùng:', error);
+        });
 
       document.getElementById('logout-btn').addEventListener('click', function () {
         localStorage.removeItem('token');
@@ -471,7 +507,7 @@
           <h6>${formatCurrency(totalItemPrice)}</h6>
         </td>
         <td class="table-action">
-          <a class="view" href="/productDetail?id=${productId}" title="Chi tiết sản phẩm"><i class="fas fa-eye"></i></a>
+          <a class="view" href="productDetail.html?productId=${productId}" title="Chi tiết sản phẩm"><i class="fas fa-eye"></i></a>
           <a class="trash" href="javascript:void(0);" title="Xóa sản phẩm"
             onclick="removeItemFromCart(${productId})"><i class="icofont-trash"></i></a>
         </td>        
@@ -828,7 +864,7 @@
                         amount: cartItems.reduce((sum, item) => sum + item.quantity * item.price, 0),
                         description: "Thanh toán đơn hàng #" + userInfo2,
                         orderId: userInfo2,
-                        
+
                       }
                       const paymentOnlineResponse = await fetch("http://localhost:9056/payment-service/api/payments/createOnline", {
                         method: "POST",

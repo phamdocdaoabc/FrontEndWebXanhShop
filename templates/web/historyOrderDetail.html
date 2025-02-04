@@ -1,275 +1,679 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" >
-<meta
-    http-equiv="content-type"
-    content="text/html;charset=utf-8"
-  />
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <meta name="author" content="mironcoder" />
-    <meta name="email" content="mironcoder@gmail.com" />
-    <meta name="profile" content="https://themeforest.net/user/mironcoder" />
-    <meta name="template" content="greeny" />
-    <meta name="title" content="greeny - Ecommerce Food Store HTML Template" />
-    <meta
-      name="keywords"
-      content="organic, food, shop, ecommerce, store, html, bootstrap, template, agriculture, vegetables, products, farm, grocery, natural, online"
-    />
-   <title>Thế giới nông sản</title>
-	<link rel="icon" href="/images/logo/logoWeb.png" />
-    <link rel="stylesheet" href="/fonts/flaticon/flaticon.css" />
-    <link rel="stylesheet" href="/fonts/icofont/icofont.min.css" />
-    <link rel="stylesheet" href="/fonts/fontawesome/fontawesome.min.css" />
-    <link rel="stylesheet" href="/vendor/venobox/venobox.min.css" />
-    <link rel="stylesheet" href="/vendor/slickslider/slick.min.css" />
-    <link rel="stylesheet" href="/vendor/niceselect/nice-select.min.css" />
-    <link rel="stylesheet" href="/vendor/bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/profile.css" />
-  </head>
-  <body>
-    
-    <!--************************************
+<html lang="en">
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="author" content="mironcoder" />
+  <meta name="email" content="mironcoder@gmail.com" />
+  <meta name="profile" content="https://themeforest.net/user/mironcoder" />
+  <meta name="template" content="greeny" />
+  <meta name="title" content="greeny - Ecommerce Food Store HTML Template" />
+  <meta name="keywords"
+    content="organic, food, shop, ecommerce, store, html, bootstrap, template, agriculture, vegetables, products, farm, grocery, natural, online" />
+  <title>Thế giới nông sản</title>
+  <link rel="icon" href="/static/images/logo/logoWeb.png" />
+  <link rel="stylesheet" href="/static/fonts/flaticon/flaticon.css" />
+  <link rel="stylesheet" href="/static/fonts/icofont/icofont.min.css" />
+  <link rel="stylesheet" href="/static/fonts/fontawesome/fontawesome.min.css" />
+  <link rel="stylesheet" href="/static/vendor/venobox/venobox.min.css" />
+  <link rel="stylesheet" href="/static/vendor/slickslider/slick.min.css" />
+  <link rel="stylesheet" href="/static/vendor/niceselect/nice-select.min.css" />
+  <link rel="stylesheet" href="/static/vendor/bootstrap/bootstrap.min.css" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/profile.css" />
+</head>
+
+<body>
+
+  <!--************************************
 				Header Start
 		*************************************-->
-		<header th:replace="~{/web/fragments/header :: header}"></header>
-		<!--************************************
+  <header id="header-placeholder"></header>
+  <script>
+    // Xóa sản phẩm khỏi giỏ hàng
+    function removeItemFromCart(productId) {
+      const token = localStorage.getItem("token");
+
+      // Lấy userId từ API profile
+      fetch("http://localhost:9056/user-service/api/profile/infor", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then(response => response.json())
+        .then(userInfo => {
+          const userId = userInfo.userId; // Lấy userId từ response
+
+          // Sau khi có userId, gọi API xóa sản phẩm khỏi giỏ hàng
+          return fetch(`http://localhost:9056/order-service/api/cart/remove?userId=${userId}&productId=${productId}`, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Lỗi khi xóa sản phẩm.");
+          }
+
+          // Xóa sản phẩm khỏi giao diện
+          const productElement = document.querySelector(`#cart-item-${productId}`);
+          if (productElement) {
+            productElement.remove();
+          }
+
+          // Kiểm tra nếu giỏ hàng trống
+          const cartItems = document.querySelectorAll(".cart-item");
+          if (cartItems.length === 0) {
+            document.getElementById("emptyCartMessage").style.display = "block";
+            document.getElementById("cartFooter").style.display = "none";
+            document.getElementById("cartTotalItems").textContent = "Tổng số lượng giỏ hàng (0)";
+          } else {
+            // Cập nhật lại tổng số lượng giỏ hàng
+            const totalCartItems = parseInt(document.getElementById("totalCartItems3").textContent.match(/\d+/)) - 1;
+            document.getElementById("totalCartItems3").textContent = `Tổng số lượng giỏ hàng: ${totalCartItems}`;
+            document.getElementById("cartTotalItems").textContent = `Tổng số lượng giỏ hàng (${totalCartItems})`;
+          }
+        })
+        .catch(error => {
+          console.error("Lỗi khi xóa sản phẩm:", error);
+        });
+    }
+
+    // Hàm xử lý giỏ hàng
+    function loadOpenCarItem() {
+      const cartIcon = document.getElementById('cartIcon'); // Biểu tượng giỏ hàng
+      const cartSidebar = document.getElementById('cartSidebar'); // Sidebar giỏ hàng
+      const closeCartSidebar = document.getElementById('closeCartSidebar'); // Nút đóng
+
+      // Mở giỏ hàng
+      cartIcon.addEventListener('click', function () {
+        cartSidebar.classList.add('active');
+      });
+
+      // Đóng giỏ hàng
+      closeCartSidebar.addEventListener('click', function () {
+        cartSidebar.classList.remove('active');
+      });
+
+      // Đóng khi click ra ngoài
+      document.addEventListener('click', function (event) {
+        if (!cartSidebar.contains(event.target) && !cartIcon.contains(event.target)) {
+          cartSidebar.classList.remove('active');
+        }
+      });
+    }
+    // Hiển thị chi tiết giỏ hàng
+    function renderCartDetails(cart) {
+      const totalItems = cart.totalItems || 0;
+      const cartItems = cart.cartItems || [];
+      const cartList = document.getElementById('cartList');
+      const emptyCartMessage = document.getElementById('emptyCartMessage');
+      const cartFooter = document.getElementById('cartFooter');
+
+      if (totalItems === 0) {
+        emptyCartMessage.style.display = 'block';
+        cartList.innerHTML = '';
+        cartFooter.style.display = 'none';
+      } else {
+        emptyCartMessage.style.display = 'none';
+        cartList.innerHTML = cartItems.map(item => `
+                  <li class="cart-item" id="cart-item-${item.productId}">
+                					<div class="cart-media">
+                    					<a href="/templates/web/productDetail.html?productId=${item.productId}">
+                        					<img src="${item.imageUrl}" alt="product" />
+                    					</a>
+                					</div>
+                					<div class="cart-info-group">
+                    					<div class="cart-info">
+                        					<h6><label>Tên sản phẩm :</label> <a href="/templates/web/productDetail.html?productId=${item.productId}" style="color: #119744">${item.productName}</a></h6>
+                        						<label>Đơn giá :</label>
+                        						<p>${formatCurrency(item.price - item.price * (item.discount / 100))} đ</p>
+                    							</div>
+                    					<div class="cart-action-group">
+                        					<div class="product-action">
+                            					<label>Số lượng : </label>
+                            					<input class="action-input" title="Quantity Number" type="number" min="1" value="${item.quantity}" style="font-weight: bold;"/>
+                        						</div>
+                        						<h6>${formatCurrency((item.price - item.price * (item.discount / 100)) * item.quantity)} đ</h6>
+                        						<button class="remove-item-btn" onclick="removeItemFromCart(${item.productId})">Xóa</button>
+                    							</div>
+                							</div>
+            					</li>
+        						`
+        )
+          .join('');
+        cartFooter.style.display = 'block';
+      }
+    }
+
+    // Định dạng tiền tệ
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    }
+
+    // Tải chi tiết giỏ hàng khi tải trang
+    document.addEventListener('DOMContentLoaded', fetchCartDetails);
+
+    // Hàm tải giỏ hàng từ API
+    async function fetchCartDetails() {
+      try {
+        const token = localStorage.getItem('token');
+        const userInfoResponse = await fetch('http://localhost:9056/user-service/api/profile/infor', {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!userInfoResponse.ok) throw new Error('Không thể lấy thông tin người dùng.');
+
+        const userInfo = await userInfoResponse.json();
+        const userId = userInfo.userId;
+
+        const cartResponse = await fetch(`http://localhost:9056/order-service/api/cart/${userId}`, {
+          method: 'GET'
+        });
+
+        if (!cartResponse.ok) throw new Error('Không thể lấy thông tin giỏ hàng.');
+
+        const cartData = await cartResponse.json();
+        renderCartDetails(cartData);
+        let cartItemCount = cartData.totalItems;
+        document.getElementById("totalCartItems2").textContent = cartItemCount;
+        const cartItemTotal = document.getElementById("totalCartItems3");
+        cartItemTotal.textContent = `Tổng số lượng giỏ hàng: ${cartData.totalItems}`;
+      } catch (error) {
+        console.error('Lỗi khi tải giỏ hàng:', error);
+        document.getElementById('emptyCartMessage').innerHTML = `
+                    <h4 style="color: #119744">Không thể tải thông tin giỏ hàng!</h4>
+                    <h5 style="color: #119744">Vui lòng thử lại sau!</h5>
+                `;
+      }
+    }
+
+
+    // Đảm bảo hàm loadUserProfile được khai báo trước
+    function loadUserProfile() {
+      const token = localStorage.getItem('token');
+      // Lấy phần tử chứa thông tin user
+      const userProfileElement = document.getElementById('user-profile');
+      if (!token) {
+        console.error('Bạn chưa đăng nhập!');
+        userProfileElement.style.display = 'none'; // Ẩn avatar và userName
+        return;
+      }
+
+      fetch('http://localhost:9056/user-service/api/profile/infor', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+        .then(response => response.json())
+        .then(data => {
+          const userNameElement = document.getElementById('user-name');
+          const userAvatarElement = document.getElementById('user-avatar');
+
+          if (data.fullName) userNameElement.textContent = data.fullName;
+          if (data.imageUrl) {
+            userAvatarElement.src = "data:image/jpeg;base64," + data.imageUrl;
+          } else {
+            userAvatarElement.src = '/static/images/user.png';
+          }
+          // Sau khi load thành công, hiển thị avatar và userName
+          userProfileElement.style.display = 'block';
+
+        })
+        .catch(error => console.error('Lỗi khi tải thông tin người dùng:', error));
+      userProfileElement.style.display = 'none'; // Ẩn nếu có lỗi
+    }
+
+    // Hiển thị nút menu Tài khoản
+    function initHeaderScripts() {
+      const token = localStorage.getItem('token');
+
+      // Nếu không có token, hiển thị các mục liên quan đến đăng nhập
+      if (!token) {
+        document.getElementById('login-link').style.display = 'block';
+        document.getElementById('register-link').style.display = 'block';
+        document.getElementById('forgot-link').style.display = 'block';
+        document.getElementById('profile-link').style.display = 'none';
+        document.getElementById('logout-link').style.display = 'none';
+        document.getElementById('admin-link').style.display = 'none';
+        return;
+      }
+
+      // Gọi API để lấy thông tin người dùng
+      fetch('http://localhost:9056/user-service/api/profile/infor', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Không thể tải thông tin người dùng!');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Thông tin người dùng:', data);
+
+          // Hiển thị các mục dựa trên vai trò
+          if (data.role === "ROLE_ADMIN") {
+            document.getElementById('login-link').style.display = 'none';
+            document.getElementById('register-link').style.display = 'none';
+            document.getElementById('forgot-link').style.display = 'none';
+            document.getElementById('profile-link').style.display = 'block';
+            document.getElementById('logout-link').style.display = 'block';
+            document.getElementById('admin-link').style.display = 'block';
+          } else if (data.role === "ROLE_USER") {
+            document.getElementById('login-link').style.display = 'none';
+            document.getElementById('register-link').style.display = 'none';
+            document.getElementById('forgot-link').style.display = 'none';
+            document.getElementById('profile-link').style.display = 'block';
+            document.getElementById('logout-link').style.display = 'block';
+            document.getElementById('admin-link').style.display = 'none';
+          }
+        })
+        .catch(error => {
+          console.error('Lỗi khi tải thông tin người dùng:', error);
+        });
+
+      document.getElementById('logout-btn').addEventListener('click', function () {
+        localStorage.removeItem('token');
+        window.location.href = '/templates/web/login.html';
+      });
+    }
+
+    function loadListCategory() {
+      fetch('http://localhost:9056/product-service/api/categories/count')
+        .then(response => response.json())
+        .then(data => {
+          console.log(data); // Xem cấu trúc trả về
+          const categoryList = document.getElementById('category-list');
+          categoryList.innerHTML = ''; // Xóa danh sách trước khi thêm mới
+
+          data.forEach(item => {
+            const listItem = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = `/templates/web/shop.html?categoryId=${item.categoryId}`;
+            link.innerText = `${item.categoryName} (${item.productCount})`; // Hiển thị tên thể loại và số lượng sản phẩm
+
+            listItem.appendChild(link);
+            categoryList.appendChild(listItem);
+          });
+        })
+        .catch(error => console.error('Error fetching category data:', error));
+    }
+    // Load nội dung từ header.html và chèn vào phần tử #header-placeholder
+    fetch('fragments/header.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('header-placeholder').innerHTML = data;
+        // Sau khi header được nhúng, kích hoạt script trong header
+        loadUserProfile();
+        initHeaderScripts();
+        loadListCategory();
+        loadOpenCarItem();
+      })
+      .catch(error => console.error('Error loading header:', error));
+  </script>
+  <!--************************************
 				Header End
 		*************************************-->
 
-    <section
-      class="inner-section single-banner"
-      style="background: url(/images/single-banner.jpg) no-repeat center">
-      <div class="container">
-        <h2>thông tin tài khoản</h2>
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a th:href="@{/}">Trang chủ</a></li>
-          
-        </ol>
-      </div>
-    </section>
-    <section class="inner-section profile-part">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="account-card">
-              <div class="account-title">
-                <h4>Thông tin tài khoản</h4>
-              </div>
-              <div class="account-content">
+  <section class="inner-section single-banner"
+    style="background: url(/static/images/single-banner.jpg) no-repeat center">
+    <div class="container">
+      <h2>thông tin tài khoản</h2>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a th:href="@{/}">Trang chủ</a></li>
+
+      </ol>
+    </div>
+  </section>
+  <section class="inner-section profile-part">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="account-card">
+            <div class="account-title">
+              <h4>Thông tin tài khoản</h4>
+            </div>
+            <div class="account-content">
+              <form id="profile-form" enctype="multipart/form-data">
                 <div class="row">
+                  <!-- Avatar Section -->
                   <div class="col-lg-2">
                     <div class="profile-image">
-                      <a href="#"><img src="/images/user.png" alt="user" /></a>
+                      <label class="form-label">Hình Đại Diện</label> <a href="javascript:void(0);">
+                        <img alt="Avatar" class="avatar-img rounded-circle"
+                          style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%;" id="avatar">
+                      </a>
+                    </div>
+                    <input type="file" name="image" id="image" class="form-control" accept="image/*"
+                      onchange="previewAndEncodeImage(this)">
+                  </div>
+
+                  <div class="col-md-6 col-lg-4">
+                    <div class="form-group">
+                      <label class="form-label">Họ và tên:</label> <input class="form-control" type="text"
+                        id="fullName" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Số Điện Thoại:</label> <input class="form-control" type="text"
+                        id="phone" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Giới Tính:</label>
+                      <div class="gender-options">
+                        <input type="radio" name="sex" value="Nam" /> Nam
+                        <input type="radio" name="sex" value="Nữ" /> Nữ
+                      </div>
                     </div>
                   </div>
                   <div class="col-md-6 col-lg-4">
                     <div class="form-group">
-                      <label class="form-label">Họ và tên</label>
-                      <input
-                        class="form-control"
-                        type="text"
-                        th:value="${user.name}"
-                      />
+                      <label class="form-label">Địa Chỉ Email:</label> <input class="form-control" type="email"
+                        id="email" />
                     </div>
-                  </div>
-                  <div class="col-md-6 col-lg-4">
                     <div class="form-group">
-                      <label class="form-label">Địa chỉ Email</label
-                      ><input
-                        class="form-control"
-                        type="email"
-                        th:value="${user.email}"
-                      />
+                      <label class="form-label">Địa Chỉ Nhà:</label> <input class="form-control" type="text"
+                        id="adress" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Ngày Sinh:</label> <input class="form-control" type="date"
+                        id="birthday" />
                     </div>
                   </div>
-                </div>
-              </div>
+                  <!-- Save Button -->
+                  <div class="text-center mt-4 mb-3">
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                  </div>
+                  <div id="alert-success" class="alert alert-success" style="display:none;">
+                    Cập nhật thành công!
+                  </div>
+              </form>
             </div>
           </div>
-        
-          <div class="col-lg-12">
-            <div class="account-card mb-0">
-              <div class="account-title">
-                <h4>Chi tiết đơn hàng</h4>
-                <a th:href="@{/profile}">
-                  Quay lại
-                </a>
-              </div>
-              <section class="inner-section checkout-part">
-                <div class="container">
-                  <div class="row">
-                    <div class="col-lg-12">
-                      <div class="account-card">
-                        <div class="account-content">
-                          <div class="table-scroll">
-                            <table class="table-list">
-                              <thead>
-                                <tr>
-                                  <th scope="col">STT</th>
-                                  <th scope="col">sản phẩm</th>
-                                  <th scope="col">Tên sản phẩm</th>
-                                  <th scope="col">Đơn giá</th>
-                                  <th scope="col">Số lượng</th>
-                                  <th scope="col">Tổng tiền</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <tr th:each="item,iState : ${orderDetail}">
-                                  <td class="table-serial"><h6>[[${iState.index + 1}]]</h6></td>
-                                  <td class="table-image">
-                                    <img th:src="@{'/loadImage?imageName='+${item.product.productImage}}" alt="product" />
-                                  </td>
-                                  <td class="table-name"><h6>[[${item.product.productName}]]</h6></td>
-                                  <td class="table-price"><h6>[[${#numbers.formatDecimal(item.price - (item.price * item.product.discount/100), 1, 'DEFAULT', 0, 'DEFAULT')}+ ' đ']]</h6></td>
-                                  <td class="table-address"><h6>[[${item.quantity}]]</h6></td>
-                                  <td class="table-brand"><h6>[[${#numbers.formatDecimal((item.price - (item.price * item.product.discount/100)) * item.quantity, 1, 'DEFAULT', 0, 'DEFAULT')}+ ' đ']]</h6></td>
-                                </tr>
-                                
-                              </tbody>
-                            </table>
-                          </div>
+        </div>
+        <script>
+          window.onload = function () {
+            loadUserProfile();
+          };
+          function loadUserProfile() {
+            const token = localStorage.getItem('token'); // Lấy token từ localStorage
+            console.log('Token:', token); // Hiển thị token ra console
+            if (!token) {
+              alert('Bạn chưa đăng nhập!');
+            }
+            fetch('http://localhost:9056/user-service/api/profile/infor', {
+              method: 'GET',
+              headers: { 'Authorization': 'Bearer ' + token }
+            })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Failed to fetch user profile');
+                }
+                return response.json();
+              })
+              .then(data => {
+                // Hiển thị thông tin user
+                document.getElementById('fullName').value = data.fullName;
+                document.getElementById('email').value = data.email;
+                document.getElementById('phone').value = data.phone;
+                document.getElementById('adress').value = data.adress;
+                document.getElementById('birthday').value = data.birthday;
+
+                // Hiển thị avatar từ Base64
+                if (data.imageUrl) {
+                  document.getElementById('avatar').src = "data:image/png;base64," + data.imageUrl;
+                }
+
+                // Hiển thị giới tính
+                const genderRadio = document.querySelector(`input[name="sex"][value="${data.sex}"]`);
+                if (genderRadio) {
+                  genderRadio.checked = true;
+                }
+              })
+              .catch(error => console.error('Error:', error));
+          }
+        </script>
+        <div class="col-lg-12">
+          <div class="account-card mb-0">
+            <div class="account-title">
+              <h4>Chi tiết đơn hàng</h4>
+              <a href="/templates/web/profile.html">
+                Quay lại
+              </a>
+            </div>
+            <section class="inner-section checkout-part">
+              <div class="container">
+                <div class="row">
+                  <div class="col-lg-12">
+                    <div class="account-card">
+                      <div class="account-content">
+                        <div class="table-scroll">
+                          <table class="table-list">
+                            <thead>
+                              <tr>
+                                <th scope="col">STT</th>
+                                <th scope="col">sản phẩm</th>
+                                <th scope="col">Tên sản phẩm</th>
+                                <th scope="col">Đơn giá</th>
+                                <th scope="col">Số lượng</th>
+                                <th scope="col">Tổng tiền</th>
+                              </tr>
+                            </thead>
+                            <tbody id="order-detail-body">
+                              <!--hiển thị thông tin sản phẩm-->
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </section>
-            </div>
-          </div>
+              </div>
+            </section>
           </div>
         </div>
-    </section>
-    
-    <!-- chỉnh sửa profile -->
-    <div class="modal fade" id="profile-edit">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <button class="modal-close" data-bs-dismiss="modal">
-            <i class="icofont-close"></i>
-          </button>
-          <form class="modal-form">
-            <div class="form-title"><h3>edit profile info</h3></div>
-            <div class="form-group">
-              <label class="form-label">profile image</label
-              ><input class="form-control" type="file" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">name</label
-              ><input class="form-control" type="text" value="Miron Mahmud" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">email</label
-              ><input
-                class="form-control"
-                type="text"
-                value="mironcoder@gmail.com"
-              />
-            </div>
-            <button class="form-btn" type="submit">save profile info</button>
+      </div>
+    </div>
+  </section>
+  <script>
+    // Lấy productId từ URL
+    document.addEventListener("DOMContentLoaded", function () {
+      const tbody = document.getElementById("order-detail-body");
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('orderId');
+      // Sử dụng backtick để kết hợp chuỗi với biến
+      fetch(`http://localhost:9056/shipping-service/api/shippings/${orderId}/products`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Không thể lấy dữ liệu từ API!");
+          }
+          return response.json();
+        })
+        .then(data => {
+          data.forEach((item, index) => {
+            const row = document.createElement("tr");
+
+            // Số thứ tự
+            const sttCell = document.createElement("td");
+            sttCell.textContent = index + 1;
+            row.appendChild(sttCell);
+
+
+            // Ảnh sản phẩm
+            const imageCell = document.createElement("td");
+            const image = document.createElement("img");
+            image.src = item.imageUrl; // URL ảnh từ API
+            image.alt = item.name; // Tên sản phẩm làm thuộc tính alt
+            image.style.width = "80px"; // Đặt kích thước ảnh
+            image.style.height = "80px";
+            image.style.objectFit = "cover";
+            imageCell.appendChild(image);
+            row.appendChild(imageCell);
+
+            // Tên sản phẩm
+            const nameCell = document.createElement("td");
+            nameCell.textContent = item.name;
+            row.appendChild(nameCell);
+
+            // Giá
+            const priceCell = document.createElement("td");
+            priceCell.textContent = item.price.toLocaleString() + " đ";
+            row.appendChild(priceCell);
+
+            // Số lượng
+            const quantityCell = document.createElement("td");
+            quantityCell.textContent = item.quantity;
+            row.appendChild(quantityCell);
+
+            // Giá tổng cộng (giá * số lượng)
+            const totalCell = document.createElement("td");
+            const total = item.price * item.quantity;
+            totalCell.textContent = total.toLocaleString() + " đ";
+            row.appendChild(totalCell);
+
+            // Thêm hàng vào tbody
+            tbody.appendChild(row);
+          });
+        })
+        .catch(error => console.error("Lỗi khi lấy dữ liệu:", error));
+    });
+  </script>
+
+  <!-- chỉnh sửa profile -->
+  <div class="modal fade" id="profile-edit">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <button class="modal-close" data-bs-dismiss="modal">
+          <i class="icofont-close"></i>
+        </button>
+        <form class="modal-form">
+          <div class="form-title">
+            <h3>edit profile info</h3>
+          </div>
+          <div class="form-group">
+            <label class="form-label">profile image</label><input class="form-control" type="file" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">name</label><input class="form-control" type="text" value="Miron Mahmud" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">email</label><input class="form-control" type="text"
+              value="mironcoder@gmail.com" />
+          </div>
+          <button class="form-btn" type="submit">save profile info</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <section class="news-part" style="background: url(/images/newsletter.jpg) no-repeat center">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-5 col-lg-6 col-xl-7">
+          <div class="news-text">
+            <h2>Nhận Chiết Khấu 20% Cho Người Đăng Ký</h2>
+            <p>Nhận Chiết Khấu 20% Cho Người Đăng Ký</p>
+          </div>
+        </div>
+        <div class="col-md-7 col-lg-6 col-xl-5">
+          <form class="news-form">
+            <input type="text" placeholder="Nhập Địa Chỉ Email Của Bạn" />
+            <button>
+              <span><i class="icofont-ui-email"></i>Gửi</span>
+            </button>
           </form>
         </div>
       </div>
     </div>
-    
-    <section class="news-part"
-		style="background: url(/images/newsletter.jpg) no-repeat center">
-		<div class="container">
-			<div class="row align-items-center">
-				<div class="col-md-5 col-lg-6 col-xl-7">
-					<div class="news-text">
-						<h2>Nhận Chiết Khấu 20% Cho Người Đăng Ký</h2>
-						<p>Nhận Chiết Khấu 20% Cho Người Đăng Ký</p>
-					</div>
-				</div>
-				<div class="col-md-7 col-lg-6 col-xl-5">
-					<form class="news-form">
-						<input type="text" placeholder="Nhập Địa Chỉ Email Của Bạn" />
-						<button>
-							<span><i class="icofont-ui-email"></i>Gửi</span>
-						</button>
-					</form>
-				</div>
-			</div>
-		</div>
-	</section>
-	<section class="intro-part">
-		<div class="container">
-			<div class="row intro-content">
-				<div class="col-sm-6 col-lg-3">
-					<div class="intro-wrap">
-						<div class="intro-icon">
-							<i class="fas fa-truck"></i>
-						</div>
-						<div class="intro-content">
-							<h5>Giao Hàng Tận Nhà Miễn Phí</h5>
-							<p>Lorem ipsum dolor sit amet adipisicing elit nobis.</p>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-lg-3">
-					<div class="intro-wrap">
-						<div class="intro-icon">
-							<i class="fas fa-sync-alt"></i>
-						</div>
-						<div class="intro-content">
-							<h5>Chính Sách Hoàn Trả</h5>
-							<p>Lorem ipsum dolor sit amet adipisicing elit nobis.</p>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-lg-3">
-					<div class="intro-wrap">
-						<div class="intro-icon">
-							<i class="fas fa-headset"></i>
-						</div>
-						<div class="intro-content">
-							<h5>Hệ Thống Hỗ Trợ</h5>
-							<p>Lorem ipsum dolor sit amet adipisicing elit nobis.</p>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-lg-3">
-					<div class="intro-wrap">
-						<div class="intro-icon">
-							<i class="fas fa-lock"></i>
-						</div>
-						<div class="intro-content">
-							<h5>Cách Thanh Toán An Toàn</h5>
-							<p>Lorem ipsum dolor sit amet adipisicing elit nobis.</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
-    
-    
-    <!--************************************
+  </section>
+  <section class="intro-part">
+    <div class="container">
+      <div class="row intro-content">
+        <div class="col-sm-6 col-lg-3">
+          <div class="intro-wrap">
+            <div class="intro-icon">
+              <i class="fas fa-truck"></i>
+            </div>
+            <div class="intro-content">
+              <h5>Giao Hàng Tận Nhà Miễn Phí</h5>
+              <p>Lorem ipsum dolor sit amet adipisicing elit nobis.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="intro-wrap">
+            <div class="intro-icon">
+              <i class="fas fa-sync-alt"></i>
+            </div>
+            <div class="intro-content">
+              <h5>Chính Sách Hoàn Trả</h5>
+              <p>Lorem ipsum dolor sit amet adipisicing elit nobis.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="intro-wrap">
+            <div class="intro-icon">
+              <i class="fas fa-headset"></i>
+            </div>
+            <div class="intro-content">
+              <h5>Hệ Thống Hỗ Trợ</h5>
+              <p>Lorem ipsum dolor sit amet adipisicing elit nobis.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="intro-wrap">
+            <div class="intro-icon">
+              <i class="fas fa-lock"></i>
+            </div>
+            <div class="intro-content">
+              <h5>Cách Thanh Toán An Toàn</h5>
+              <p>Lorem ipsum dolor sit amet adipisicing elit nobis.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!--************************************
 				Footer Start
 		*************************************-->
-		<footer th:replace="~{/web/fragments/footer :: footer}"></footer>
-				
-		<!--************************************
+  <header id="footer-placeholder"></header>
+  <script>
+    // Load nội dung từ header.html và chèn vào phần tử #header-placeholder
+    fetch('fragments/footer.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('footer-placeholder').innerHTML = data;
+      })
+      .catch(error => console.error('Error loading header:', error));
+  </script>
+  <!--************************************
 				Footer End
 		*************************************-->
-		
-    <script src="/vendor/bootstrap/jquery-1.12.4.min.js"></script>
-    <script src="/vendor/bootstrap/popper.min.js"></script>
-    <script src="/vendor/bootstrap/bootstrap.min.js"></script>
-    <script src="/vendor/countdown/countdown.min.js"></script>
-    <script src="/vendor/niceselect/nice-select.min.js"></script>
-    <script src="/vendor/slickslider/slick.min.js"></script>
-    <script src="/vendor/venobox/venobox.min.js"></script>
-    <script src="/js/nice-select.js"></script>
-    <script src="/js/countdown.js"></script>
-    <script src="/js/accordion.js"></script>
-    <script src="/js/venobox.js"></script>
-    <script src="/js/slick.js"></script>
-    <script src="/js/main.js"></script>
-  </body>
+
+  <script src="/static/vendor/bootstrap/jquery-1.12.4.min.js"></script>
+  <script src="/static/vendor/bootstrap/popper.min.js"></script>
+  <script src="/static/vendor/bootstrap/bootstrap.min.js"></script>
+  <script src="/static/vendor/countdown/countdown.min.js"></script>
+  <script src="/static/vendor/niceselect/nice-select.min.js"></script>
+  <script src="/static/vendor/slickslider/slick.min.js"></script>
+  <script src="/static/vendor/venobox/venobox.min.js"></script>
+  <script src="/static/js/nice-select.js"></script>
+  <script src="/static/js/countdown.js"></script>
+  <script src="/static/js/accordion.js"></script>
+  <script src="/static/js/venobox.js"></script>
+  <script src="/static/js/slick.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+
 </html>

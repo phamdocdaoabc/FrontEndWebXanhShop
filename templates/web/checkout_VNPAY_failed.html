@@ -228,20 +228,56 @@
         .catch(error => console.error('Lỗi khi tải thông tin người dùng:', error));
       userProfileElement.style.display = 'none'; // Ẩn nếu có lỗi
     }
-    // Hiển thị nút
+
+    // Hiển thị nút menu Tài khoản
     function initHeaderScripts() {
       const token = localStorage.getItem('token');
 
-      if (token) {
-        document.getElementById('login-link').style.display = 'none';
-        document.getElementById('register-link').style.display = 'none';
-        document.getElementById('forgot-link').style.display = 'none';
-        document.getElementById('profile-link').style.display = 'block';
-        document.getElementById('logout-link').style.display = 'block';
-      } else {
+      // Nếu không có token, hiển thị các mục liên quan đến đăng nhập
+      if (!token) {
+        document.getElementById('login-link').style.display = 'block';
+        document.getElementById('register-link').style.display = 'block';
+        document.getElementById('forgot-link').style.display = 'block';
         document.getElementById('profile-link').style.display = 'none';
         document.getElementById('logout-link').style.display = 'none';
+        document.getElementById('admin-link').style.display = 'none';
+        return;
       }
+
+      // Gọi API để lấy thông tin người dùng
+      fetch('http://localhost:9056/user-service/api/profile/infor', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Không thể tải thông tin người dùng!');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Thông tin người dùng:', data);
+
+          // Hiển thị các mục dựa trên vai trò
+          if (data.role === "ROLE_ADMIN") {
+            document.getElementById('login-link').style.display = 'none';
+            document.getElementById('register-link').style.display = 'none';
+            document.getElementById('forgot-link').style.display = 'none';
+            document.getElementById('profile-link').style.display = 'block';
+            document.getElementById('logout-link').style.display = 'block';
+            document.getElementById('admin-link').style.display = 'block';
+          } else if (data.role === "ROLE_USER") {
+            document.getElementById('login-link').style.display = 'none';
+            document.getElementById('register-link').style.display = 'none';
+            document.getElementById('forgot-link').style.display = 'none';
+            document.getElementById('profile-link').style.display = 'block';
+            document.getElementById('logout-link').style.display = 'block';
+            document.getElementById('admin-link').style.display = 'none';
+          }
+        })
+        .catch(error => {
+          console.error('Lỗi khi tải thông tin người dùng:', error);
+        });
 
       document.getElementById('logout-btn').addEventListener('click', function () {
         localStorage.removeItem('token');
@@ -286,7 +322,8 @@
 				Header End
 		*************************************-->
 
-  <section class="inner-section single-banner" style="background: url(/static/images/single-banner.jpg) no-repeat center">
+  <section class="inner-section single-banner"
+    style="background: url(/static/images/single-banner.jpg) no-repeat center">
     <div class="container">
       <h2>Thông tin đơn hàng</h2>
       <ol class="breadcrumb">
@@ -415,16 +452,16 @@
   <!--************************************
 				Footer Start
 		*************************************-->
-    <header id="footer-placeholder"></header>
-    <script>
-      // Load nội dung từ header.html và chèn vào phần tử #header-placeholder
-      fetch('fragments/footer.html')
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById('footer-placeholder').innerHTML = data;
-        })
-        .catch(error => console.error('Error loading header:', error));
-    </script>
+  <header id="footer-placeholder"></header>
+  <script>
+    // Load nội dung từ header.html và chèn vào phần tử #header-placeholder
+    fetch('fragments/footer.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('footer-placeholder').innerHTML = data;
+      })
+      .catch(error => console.error('Error loading header:', error));
+  </script>
   <!--************************************
 				Footer End
 		*************************************-->

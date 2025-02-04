@@ -1,124 +1,232 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta charset="UTF-8" />
 	<title>Greenty - Trang quản trị</title>
 	<meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
-	<link rel="icon" href="/assets/img/icon.ico" type="image/x-icon"/>
-	
+	<link rel="icon" href="/static/assets/img/icon.ico" type="image/x-icon" />
+
 	<!-- Fonts and icons -->
-	<script src="/assets/js/plugin/webfont/webfont.min.js"></script>
+	<script src="/static/assets/js/plugin/webfont/webfont.min.js"></script>
 	<script>
 		WebFont.load({
-			google: {"families":["Lato:300,400,700,900"]},
-			custom: {"families":["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['/assets/css/fonts.min.css']},
-			active: function() {
+			google: { "families": ["Lato:300,400,700,900"] },
+			custom: { "families": ["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['/static/assets/css/fonts.min.css'] },
+			active: function () {
 				sessionStorage.fonts = true;
 			}
 		});
 	</script>
 
 	<!-- CSS Files -->
-	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-	<link rel="stylesheet" href="/assets/css/atlantis.min.css">
+	<link rel="stylesheet" href="/static/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/static/assets/css/atlantis.min.css">
 	<!-- CSS Just for demo purpose, don't include it in your project -->
-	<link rel="stylesheet" href="/assets/css/demo.css">
+	<link rel="stylesheet" href="/static/assets/css/demo.css">
 </head>
+
 <body>
 	<div class="wrapper">
-	<!-- Header -->
-	
-	<th:block th:replace="~{admin/fragments/header :: header}"></th:block>
-	
-	<!-- End Header -->
-	
-	<!-- Navbar -->
-	
-	<th:block th:replace="~{admin/fragments/navbar :: navbar}"></th:block>
-	
-	<!-- End Navbar -->
-		
-	<div class="main-panel">
-		<div class="content">
-			<div class="page-inner">
-				<div class="page-header">
-					<h4 class="page-title text-success">Quản lý thể loại</h4>
-					<ul class="breadcrumbs">
-						<li class="nav-home">
-							<a href="javascript:void(0);">
-								<i class="flaticon-home"></i>
-							</a>
-						</li>
-						<li class="separator">
-							<i class="flaticon-right-arrow"></i>
-						</li>
-						<li class="nav-item">
-							<a th:href="@{/admin/home}">Trang chủ</a>
-						</li>
-						<li class="separator">
-							<i class="flaticon-right-arrow"></i>
-						</li>
-						<li class="nav-item">
-							<a href="javascript:void(0);">Quản lý thể loại</a>
-						</li>
-					</ul>
-				</div>
+		<!-- Header -->
+		<header id="header-placeholder"></header>
+		<script>
+			// Load nội dung từ header.html
+			fetch('fragments/header.html')
+				.then(response => response.text())
+				.then(data => {
+					document.getElementById('header-placeholder').innerHTML = data;
+				})
+				.catch(error => console.error('Error loading header:', error));
+		</script>
+		<!-- End Header -->
+
+		<!-- Navbar -->
+		<header id="navbar-placeholder"></header>
+		<script>
+			function loadAdminProfile() {
+				const token = localStorage.getItem('token'); // Lấy token từ localStorage
+				console.log('Token:', token); // Hiển thị token ra console
+
+				// Lấy phần tử chứa thông tin user
+				const userProfileElement = document.getElementById('user-profile');
+				const userNameElement = document.getElementById('user-name');
+				const userAvatarElement = document.getElementById('user-avatar');
+
+				// Kiểm tra nếu không có token
+				if (!token) {
+					console.error('Bạn chưa đăng nhập!');
+					userProfileElement.style.display = 'none'; // Ẩn avatar và userName
+					return;
+				}
+
+				// Gọi API để lấy thông tin người dùng
+				fetch('http://localhost:9056/user-service/api/profile/infor', {
+					method: 'GET',
+					headers: { 'Authorization': 'Bearer ' + token }
+				})
+					.then(response => {
+						if (!response.ok) {
+							throw new Error('Không thể tải thông tin người dùng!');
+						}
+						return response.json();
+					})
+					.then(data => {
+						console.log('Thông tin người dùng:', data);
+
+						// Hiển thị thông tin người dùng
+						if (data.fullName) {
+							userNameElement.textContent = data.fullName;
+						} else {
+							userNameElement.textContent = "Admin";
+						}
+
+						// Hiển thị avatar
+						if (data.imageUrl) {
+							userAvatarElement.src = "data:image/png;base64," + data.imageUrl;
+						} else {
+							userAvatarElement.src = '/static/images/user.png'; // Avatar mặc định
+						}
+
+						// Hiển thị phần tử sau khi có dữ liệu
+						userProfileElement.style.display = 'block';
+					})
+					.catch(error => {
+						console.error('Lỗi khi tải thông tin người dùng:', error);
+						userAvatarElement.src = '/static/images/user.png'; // Avatar mặc định khi lỗi
+						userProfileElement.style.display = 'none'; // Ẩn thông tin nếu xảy ra lỗi
+					});
+			}
+			// Load nội dung từ navbar.html
+			fetch('fragments/navbar.html')
+				.then(response => response.text())
+				.then(data => {
+					document.getElementById('navbar-placeholder').innerHTML = data;
+					loadAdminProfile();
+				})
+				.catch(error => console.error('Error loading navbar:', error));
+		</script>
+		<!-- End Navbar -->
+
+		<div class="main-panel">
+			<div class="content">
+				<div class="page-inner">
+					<div class="page-header">
+						<h4 class="page-title text-success">Quản lý thể loại</h4>
+						<ul class="breadcrumbs">
+							<li class="nav-home">
+								<a href="javascript:void(0);">
+									<i class="flaticon-home"></i>
+								</a>
+							</li>
+							<li class="separator">
+								<i class="flaticon-right-arrow"></i>
+							</li>
+							<li class="nav-item">
+								<a th:href="@{/admin/home}">Trang chủ</a>
+							</li>
+							<li class="separator">
+								<i class="flaticon-right-arrow"></i>
+							</li>
+							<li class="nav-item">
+								<a href="javascript:void(0);">Quản lý thể loại</a>
+							</li>
+						</ul>
+					</div>
 					<div class="col-md-12">
 						<div class="card">
 							<div class="card-header">
 								<div class="d-flex align-items-center">
 									<h4 class="card-title" style="text-decoration: underline;">Quản lý thể loại</h4>
-									<button class="btn btn-outline-success btn-round ml-auto" data-toggle="modal" data-target="#addRowModal">
+									<button class="btn btn-outline-success btn-round ml-auto" data-toggle="modal"
+										data-target="#addRowModal">
 										<i class="fa fa-plus me-3"></i>
 										Thêm mới
 									</button>
 								</div>
 							</div>
 							<div class="card-body">
-								<!-- Modal add -->
+								<!-- Modal add new-->
 								<div class="modal fade" id="addRowModal" tabindex="-1" role="dialog" aria-hidden="true">
 									<div class="modal-dialog" role="document">
 										<div class="modal-content">
 											<div class="modal-header no-bd">
 												<h5 class="modal-title">
-													<span class="fw-mediumbold" style="text-decoration: underline; color: black;">
-													Thêm mới thể loại</span> 
-												
+													<span class="fw-mediumbold"
+														style="text-decoration: underline; color: black;">
+														Thêm mới thể loại</span>
+
 												</h5>
-												<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<button type="button" class="close" data-dismiss="modal"
+													aria-label="Close">
 													<span aria-hidden="true">&times;</span>
 												</button>
 											</div>
 											<div class="modal-body">
-												<form th:action="@{/admin/addCategory}" th:object="${category}" method="post">
+												<form>
 													<div class="row">
 														<div class="col-sm-12">
 															<div class="form-group form-group-default">
 																<label>Tên thể lọai</label>
-																<input th:field="*{categoryName}" id="categoryName" type="text" class="form-control" placeholder="Tên thể lọai" required="required">
+																<input id="categoryName" type="text"
+																	class="form-control" placeholder="Tên thể lọai"
+																	required="required">
 															</div>
 														</div>
 													</div>
 													<div class="modal-footer no-bd">
-														<button type="submit" id="" class="btn btn-primary">Thêm</button>
-														<button type="button" class="btn btn-danger" data-dismiss="modal">Hủy</button>
+														<button type="submit" onclick="addCategory()"
+															class="btn btn-primary">Thêm</button>
+														<button type="button" class="btn btn-danger"
+															data-dismiss="modal">Hủy</button>
 													</div>
 												</form>
 											</div>
 										</div>
 									</div>
 								</div>
+								<script>
+									// Thêm thể loại mới
+									document.addEventListener("DOMContentLoaded", function () {
+										// Lấy categoryId từ URL										
+										window.addCategory = function () {
+											const categoryName = document.getElementById("categoryName").value.trim();
 
-								<div class="alert alert-success row col-12"
-									th:if="${message}" th:text="${message}">
+											if (!categoryName) {
+												alert("Tên thể loại không được để trống.");
+												return;
+											}
+											console.log(categoryName);
+
+											fetch('http://localhost:9056/product-service/api/categories/create', {
+												method: 'POST',
+												headers: {
+													'Content-Type': 'application/json'
+												},
+												body: JSON.stringify({ categoryName: categoryName })
+											})
+												.then(response => {
+													if (!response.ok) {
+														throw new Error("Lưu thất bại! Vui lòng thử lại.");
+													} else {
+														alert("Thêm thể loại thành công.");
+														window.location.href = "categories.html"; // Điều hướng lại danh sách
+													}
+												})
+										};
+									});
+								</script>
+
+								<div class="alert alert-success row col-12" th:if="${message}" th:text="${message}">
 								</div>
 								<div class="table-responsive">
-									<table id="add-row" class="display table table-striped table-hover" >
+									<table class="display table table-striped table-hover">
 										<thead>
 											<tr>
 												<th>ID</th>
 												<th>Name</th>
+												<th>Count</th>
 												<th style="width: 10%">Action</th>
 											</tr>
 										</thead>
@@ -126,39 +234,174 @@
 											<tr>
 												<th>ID</th>
 												<th>Name</th>
+												<th>Count</th>
 												<th>Action</th>
 											</tr>
 										</tfoot>
 										<tbody>
-											<tr th:each="item : ${categories}">
-												<td>[[${item.categoryId}]]</td>
-												<td>[[${item.categoryName}]]</td>
-												<td>
-													<div class="form-button-action">
-														<a th:href="@{/admin/editCategory/{categoryId}(categoryId=${item.categoryId})}"
-															type="button" data-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Chỉnh sửa">
-															<i class="fa fa-edit"></i>
-														</a>
-														<button th:data-id="${item.categoryId}" th:data-name="${item.categoryName}"
-																onclick="showConfigModalDialog(this.getAttribute('data-id'), this.getAttribute('data-name'))"
-														 		type="button" data-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Xóa">
-															<i class="fa fa-trash"></i>
-														</button>
-													</div>
-												</td>
-											</tr>
+											<!-- Nội dung của tbody sẽ được JavaScript cập nhật -->
 										</tbody>
 									</table>
-									
-									<!-- Delete Category th:data-id="${item.categoryId}" th:href="@{/editCategory/(id=${category.categoryId})}"-->
+									<div id="pagination" class="pagination" style="text-align: right;"></div>
+
 									<script>
-									function showConfigModalDialog(id, name) {
-										$('#name').text(name);
-										$('#yesOption').attr('href', '/admin/delete/'+id);
-										$('#configmationId').modal('show');
-									}
+										document.addEventListener("DOMContentLoaded", function () {
+											loadCategorys(0, 55);
+											const categoryTableBody = document.querySelector("tbody");
+										});
+
+										const loadCategorys = (page = 0, size = 5) => {
+											// Gọi API để lấy danh sách thể loại
+											fetch(`http://localhost:9056/product-service/api/categories/countPage?page=${page}&size=${size}`)
+												.then(response => {
+													if (!response.ok) throw new Error("Không thể lấy danh sách thể loại!");
+													return response.json();
+												})
+												.then(data => {
+													const categorys = data.content; // Danh sách đơn hàng
+													const pageInfo = {
+														number: data.number,
+														totalPages: data.totalPages,
+														first: data.first,
+														last: data.last
+													};
+													const categoryTableBody = document.querySelector("tbody");
+													categoryTableBody.innerHTML = ""; // Xóa nội dung cũ
+
+													categorys.forEach(category => {
+														const row = `
+                                                        <tr>
+                                                            <td><h6>${category.categoryId}</h6></td>
+                                                            <td><h6>${category.categoryName}</h6></td>
+                                                            <td><h6>${category.productCount}</h6></td>
+                                                            <td>
+                                                                <div class="form-button-action">
+                                                                    <a href="editCategory.html?categoryId=${category.categoryId}&categoryName=${encodeURIComponent(category.categoryName)}" 
+                                                                        type="button" 
+                                                                        data-toggle="tooltip" 
+                                                                        title="Chỉnh sửa" 
+                                                                        class="btn btn-link btn-primary btn-lg">
+                                                                        <i class="fa fa-edit"></i>
+                                                                    </a>
+                                                                    <button 
+                                                                        data-id="${category.categoryId}" 
+                                                                        data-name="${category.categoryName}" 
+                                                                        onclick="openDeleteConfirmation(this.getAttribute('data-id'))"
+                                                                        type="button" 
+                                                                        data-toggle="tooltip" 
+                                                                        title="Xóa" 
+                                                                        class="btn btn-link btn-danger">
+                                                                        <i class="fa fa-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>`;
+														categoryTableBody.insertAdjacentHTML("beforeend", row);
+													});
+													// Hiển thị phân trang
+													renderPagination(pageInfo)
+												});
+										};
+
+										const openDeleteConfirmation = (categoryId) => {
+											// Hiển thị modal
+											$('#configmationId').modal('show');
+
+											// Gắn categoryId vào nút "Có"
+											const yesButton = document.getElementById("yesOption");
+											yesButton.onclick = () => deleteCategory(categoryId); // Gọi hàm xóa khi nhấn "Có"
+										};
+
+										// Xóa thể loại
+										const deleteCategory = (categoryId) => {
+											fetch(`http://localhost:9056/product-service/api/categories/${categoryId}`, {
+												method: "DELETE",
+												headers: {
+													"Content-Type": "application/json"
+												}
+											})
+												.then(response => {
+													if (!response.ok) throw new Error("Xóa thất bại!");
+													return response.json();
+												})
+												.then(() => {
+													alert("Thể loại đã được xóa thành công!");
+													$('#configmationId').modal('hide'); // Đóng modal
+													loadCategorys(); // Tải lại danh sách
+												})
+												.catch(error => {
+													console.error("Lỗi:", error);
+													alert("Không thể xóa thể loại. Vui lòng thử lại.");
+												});
+										};
+
+										// Phân trang
+										const renderPagination = (pageInfo) => {
+											const paginationContainer = document.querySelector("#pagination");
+											paginationContainer.innerHTML = ""; // Xóa nút cũ
+
+											const { number, totalPages, first, last } = pageInfo;
+
+											// Nút "Previous"
+											const prevButton = document.createElement("button");
+											prevButton.textContent = "Previous";
+											prevButton.disabled = first; // Vô hiệu hóa nếu là trang đầu
+											prevButton.onclick = () => loadCategorys(number - 1);
+											paginationContainer.appendChild(prevButton);
+
+											// Nút số trang
+											for (let i = 0; i < totalPages; i++) {
+												const pageButton = document.createElement("button");
+												pageButton.textContent = i + 1;
+												pageButton.classList.add("page-button");
+												if (i === number) {
+													pageButton.classList.add("active"); // Đánh dấu trang hiện tại
+												}
+												pageButton.onclick = () => loadCategorys(i);
+												paginationContainer.appendChild(pageButton);
+											}
+
+											// Nút "Next"
+											const nextButton = document.createElement("button");
+											nextButton.textContent = "Next";
+											nextButton.disabled = last; // Vô hiệu hóa nếu là trang cuối
+											nextButton.onclick = () => loadCategorys(number + 1);
+											paginationContainer.appendChild(nextButton);
+										};
 									</script>
-									
+									<style>
+										.pagination button {
+											margin: 0 5px;
+											padding: 5px 10px;
+											border: 1px solid #ccc;
+											background-color: white;
+											cursor: pointer;
+										}
+
+										.pagination button.active {
+											background-color: #007bff;
+											color: white;
+											font-weight: bold;
+										}
+
+										.pagination button:disabled {
+											background-color: #e9ecef;
+											color: #6c757d;
+											cursor: not-allowed;
+										}
+
+										.table-responsive {
+											position: relative;
+										}
+
+										.pagination {
+											display: flex;
+											justify-content: right;
+											margin-top: 10px;
+											/* Khoảng cách giữa bảng và phân trang */
+										}
+									</style>
+
 									<!-- Modal -->
 									<div class="modal" tabindex="-1" role="dialog" id="configmationId">
 										<div class="modal-dialog" role="document">
@@ -187,137 +430,41 @@
 					</div>
 				</div>
 			</div>
-		<footer class="footer">
-			<div class="container-fluid">
-				<nav class="pull-left">
-					<ul class="nav">
-						<li class="nav-item">
-							<a class="nav-link" href="javascript:void(0);">
-								GREENTY-SHOP
-							</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="javascript:void(0);">
-								Help
-							</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="javascript:void(0);">
-								Licenses
-							</a>
-						</li>
-					</ul>
-				</nav>
-				<div class="copyright ml-auto">
-					2024, made with <i class="fa fa-heart heart text-danger"></i> by <a href="">GREENTY-SHOP</a>
-				</div>				
-			</div>
-		</footer>
-	</div>
-	
-		<!-- End Custom template -->
-	</div>
-	<!--   Core JS Files   -->
-	<script src="/assets/js/core/jquery.3.2.1.min.js"></script>
-	<script src="/assets/js/core/popper.min.js"></script>
-	<script src="/assets/js/core/bootstrap.min.js"></script>
-	<!-- jQuery UI -->
-	<script src="/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
-	<script src="/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
-	
-	<!-- jQuery Scrollbar -->
-	<script src="/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
-	<!-- Datatables -->
-	<script src="/assets/js/plugin/datatables/datatables.min.js"></script>
-	<!-- Atlantis JS -->
-	<script src="/assets/js/atlantis.min.js"></script>
-	<!-- Atlantis DEMO methods, don't include it in your project! -->
-	<script src="/assets/js/setting-demo2.js"></script>
-	<script >
-		$(document).ready(function() {
-			$('#basic-datatables').DataTable({
-			});
+			<!--************************************
+				Footer Start
+		*************************************-->
+			<header id="footer-placeholder"></header>
+			<script>
+				// Load nội dung từ header.html và chèn vào phần tử #header-placeholder
+				fetch('fragments/footer.html')
+					.then(response => response.text())
+					.then(data => {
+						document.getElementById('footer-placeholder').innerHTML = data;
+					})
+					.catch(error => console.error('Error loading header:', error));
+			</script>
+			<!--************************************
+				Footer End
+		*************************************-->
 
-			$('#multi-filter-select').DataTable( {
-				"pageLength": 5,
-				initComplete: function () {
-					this.api().columns().every( function () {
-						var column = this;
-						var select = $('<select class="form-control"><option value=""></option></select>')
-						.appendTo( $(column.footer()).empty() )
-						.on( 'change', function () {
-							var val = $.fn.dataTable.util.escapeRegex(
-								$(this).val()
-								);
+			<!-- End Custom template -->
+		</div>
+		<!--   Core JS Files   -->
+		<script src="/static/assets/js/core/jquery.3.2.1.min.js"></script>
+		<script src="/static/assets/js/core/popper.min.js"></script>
+		<script src="/static/assets/js/core/bootstrap.min.js"></script>
+		<!-- jQuery UI -->
+		<script src="/static/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+		<script src="/static/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
 
-							column
-							.search( val ? '^'+val+'$' : '', true, false )
-							.draw();
-						} );
-
-						column.data().unique().sort().each( function ( d, j ) {
-							select.append( '<option value="'+d+'">'+d+'</option>' )
-						} );
-					} );
-				}
-			});	
-
-			// Add Row
-			$('#add-row').DataTable({
-				"pageLength": 5,
-			});
-
-			var action = '<td> <div class="form-button-action"> <button type="button" data-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task"> <i class="fa fa-edit"></i> </button> <button type="button" data-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Remove"> <i class="fa fa-times"></i> </button> </div> </td>';
-
-			/* $('#addRowButton').click(function() {
-				$('#add-row').dataTable().fnAddData([
-					$("#addName").val(),
-					$("#addPosition").val(),
-					$("#addOffice").val(),
-					action
-					]);
-				$('#addRowModal').modal('hide');
-
-			}); */
-			
-			 $('#editRowButton').click(function(event) {
-				/* $('#edit-row').dataTable().fnAddData([
-					$("#categoryId").val(category.categoryId),
-					$("#name").val(category.name),
-					action
-					]);
-				$('#editRowModal').modal('hide'); */
-				
-				event.preventDefault();
-				
-				var href= $(this).attr('href');
-				
-				$.get(href, function(category){
-					$('#categoryId').val(category.categoryId);
-					$('#name').val(category.name);
-				})
-				
-				$('#editRowModal').modal();	
-
-			}); 
-			
-			/* $('.table .btn').on('click', function(event){
-				
-				event.preventDefault();
-				
-				var href= $(this).attr('href');
-				
-				$.get(href, function(category){
-					$('#categoryId').val(category.categoryId);
-					$('#name').val(category.name);
-				})
-				
-				$('#editRowModal').modal();
-			}); */
-			
-		});
-		
-		
-	</script>
+		<!-- jQuery Scrollbar -->
+		<script src="/static/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+		<!-- Datatables -->
+		<script src="/static/assets/js/plugin/datatables/datatables.min.js"></script>
+		<!-- Atlantis JS -->
+		<script src="/static/assets/js/atlantis.min.js"></script>
+		<!-- Atlantis DEMO methods, don't include it in your project! -->
+		<script src="/static/assets/js/setting-demo2.js"></script>
 </body>
+
 </html>

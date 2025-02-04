@@ -228,27 +228,62 @@
         .catch(error => console.error('Lỗi khi tải thông tin người dùng:', error));
       userProfileElement.style.display = 'none'; // Ẩn nếu có lỗi
     }
-    // Hiển thị nút
+
+    // Hiển thị nút menu Tài khoản
     function initHeaderScripts() {
       const token = localStorage.getItem('token');
 
-      if (token) {
-        document.getElementById('login-link').style.display = 'none';
-        document.getElementById('register-link').style.display = 'none';
-        document.getElementById('forgot-link').style.display = 'none';
-        document.getElementById('profile-link').style.display = 'block';
-        document.getElementById('logout-link').style.display = 'block';
-      } else {
+      // Nếu không có token, hiển thị các mục liên quan đến đăng nhập
+      if (!token) {
+        document.getElementById('login-link').style.display = 'block';
+        document.getElementById('register-link').style.display = 'block';
+        document.getElementById('forgot-link').style.display = 'block';
         document.getElementById('profile-link').style.display = 'none';
         document.getElementById('logout-link').style.display = 'none';
+        document.getElementById('admin-link').style.display = 'none';
+        return;
       }
+
+      // Gọi API để lấy thông tin người dùng
+      fetch('http://localhost:9056/user-service/api/profile/infor', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Không thể tải thông tin người dùng!');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Thông tin người dùng:', data);
+
+          // Hiển thị các mục dựa trên vai trò
+          if (data.role === "ROLE_ADMIN") {
+            document.getElementById('login-link').style.display = 'none';
+            document.getElementById('register-link').style.display = 'none';
+            document.getElementById('forgot-link').style.display = 'none';
+            document.getElementById('profile-link').style.display = 'block';
+            document.getElementById('logout-link').style.display = 'block';
+            document.getElementById('admin-link').style.display = 'block';
+          } else if (data.role === "ROLE_USER") {
+            document.getElementById('login-link').style.display = 'none';
+            document.getElementById('register-link').style.display = 'none';
+            document.getElementById('forgot-link').style.display = 'none';
+            document.getElementById('profile-link').style.display = 'block';
+            document.getElementById('logout-link').style.display = 'block';
+            document.getElementById('admin-link').style.display = 'none';
+          }
+        })
+        .catch(error => {
+          console.error('Lỗi khi tải thông tin người dùng:', error);
+        });
 
       document.getElementById('logout-btn').addEventListener('click', function () {
         localStorage.removeItem('token');
         window.location.href = '/templates/web/login.html';
       });
     }
-
     function loadListCategory() {
       fetch('http://localhost:9056/product-service/api/categories/count')
         .then(response => response.json())
@@ -286,7 +321,8 @@
 				Header End
 		*************************************-->
 
-  <section class="inner-section single-banner" style="background: url(/static/images/single-banner.jpg) no-repeat center">
+  <section class="inner-section single-banner"
+    style="background: url(/static/images/single-banner.jpg) no-repeat center">
     <div class="container">
       <h2>Thông tin đơn hàng</h2>
       <ol class="breadcrumb">
@@ -312,12 +348,13 @@
             <div class="text-center">
               <h3 style="color: #119744" class="mt-5">GIAO DỊCH THANH TOÁN ĐƠN HÀNG QUA VNPAY THÀNH CÔNG!</h3>
               <br>
-              <h4>Chúc mừng bạn <span id="userFullName" style="text-decoration: underline; color: #119744"></span> đã đặt
+              <h4>Chúc mừng bạn <span id="userFullName" style="text-decoration: underline; color: #119744"></span> đã
+                đặt
                 hàng, thanh toán thành công!</h4>
               <h5><em>Chúng tôi sẽ sớm giao đơn hàng cho bạn, cảm ơn!</em></h5>
               <h5><em>Thank you for your purchase, thank you!</em></h5>
               <hr>
-              <a th:href="@{/}" style="text-decoration: underline; color: #119744"><em>Click tại đây để tiếp tục mua
+              <a href="/templates/web/shop.html" style="text-decoration: underline; color: #119744"><em>Click tại đây để tiếp tục mua
                   sắm!</em></a>
             </div>
           </div>
@@ -415,16 +452,16 @@
   <!--************************************
 				Footer Start
 		*************************************-->
-    <header id="footer-placeholder"></header>
-    <script>
-      // Load nội dung từ header.html và chèn vào phần tử #header-placeholder
-      fetch('fragments/footer.html')
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById('footer-placeholder').innerHTML = data;
-        })
-        .catch(error => console.error('Error loading header:', error));
-    </script>
+  <header id="footer-placeholder"></header>
+  <script>
+    // Load nội dung từ header.html và chèn vào phần tử #header-placeholder
+    fetch('fragments/footer.html')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('footer-placeholder').innerHTML = data;
+      })
+      .catch(error => console.error('Error loading header:', error));
+  </script>
   <!--************************************
 				Footer End
 		*************************************-->

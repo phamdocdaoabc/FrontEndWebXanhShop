@@ -191,31 +191,70 @@
 							<li class="navbar-item dropdown"><a class="navbar-link dropdown-arrow"
 									href="javascript:void(0);">Tài khoản</a>
 								<ul class="dropdown-position-list">
-									<li id="login-link"><a href="/templates/web/login.html">Đăng nhập</a></li>
-									<li id="register-link"><a href="/templates/web/register.html">Đăng ký</a></li>
-									<li id="forgot-link"><a href="/templates/web/forgotPassword.html">Quên mật khẩu</a>
+									<li id="login-link" style="display:block;"><a href="/templates/web/login.html">Đăng
+											nhập</a></li>
+									<li id="register-link" style="display: block;"><a
+											href="/templates/web/register.html">Đăng ký</a></li>
+									<li id="forgot-link" style="display: block;"><a
+											href="/templates/web/forgotPassword.html">Quên mật khẩu</a>
 									</li>
 									<li id="profile-link" style="display: none;"><a
 											href="/templates/web/profile.html">Thông tin tài khoản</a></li>
+									<li id="admin-link" style="display: none;"><a
+											href="/templates/admin/index.html">Trang Admin</a></li>
 									<li id="logout-link" style="display: none;"><a href="javascript:void(0)"
 											id="logout-btn">Đăng xuất</a></li>
+
 								</ul>
 								<script>
 									document.addEventListener('DOMContentLoaded', function () {
 										const token = localStorage.getItem('token');
-										// Kiểm tra xem có token hay không
-										if (token) {
-											// Nếu đã đăng nhập Ẩn nút "Đăng nhập" và hiển thị nút "Thông tin tài khoản" và "Đăng xuất"
-											document.getElementById('login-link').style.display = 'none';
-											document.getElementById('register-link').style.display = 'none';
-											document.getElementById('forgot-link').style.display = 'none';
-											document.getElementById('profile-link').style.display = 'block';
-											document.getElementById('logout-link').style.display = 'block';
-										} else {
-											// Ẩn nút "Thông tin tài khoản" và "Đăng xuất" nếu chưa đăng nhập
+
+										// Nếu không có token, hiển thị các mục liên quan đến đăng nhập
+										if (!token) {
+											document.getElementById('login-link').style.display = 'block';
+											document.getElementById('register-link').style.display = 'block';
+											document.getElementById('forgot-link').style.display = 'block';
 											document.getElementById('profile-link').style.display = 'none';
 											document.getElementById('logout-link').style.display = 'none';
+											document.getElementById('admin-link').style.display = 'none';
+											return;
 										}
+
+										// Gọi API để lấy thông tin người dùng
+										fetch('http://localhost:9056/user-service/api/profile/infor', {
+											method: 'GET',
+											headers: { 'Authorization': 'Bearer ' + token }
+										})
+											.then(response => {
+												if (!response.ok) {
+													throw new Error('Không thể tải thông tin người dùng!');
+												}
+												return response.json();
+											})
+											.then(data => {
+												console.log('Thông tin người dùng:', data);
+
+												// Hiển thị các mục dựa trên vai trò
+												if (data.role === "ROLE_ADMIN") {
+													document.getElementById('login-link').style.display = 'none';
+													document.getElementById('register-link').style.display = 'none';
+													document.getElementById('forgot-link').style.display = 'none';
+													document.getElementById('profile-link').style.display = 'block';
+													document.getElementById('logout-link').style.display = 'block';
+													document.getElementById('admin-link').style.display = 'block';
+												} else if (data.role === "ROLE_USER") {
+													document.getElementById('login-link').style.display = 'none';
+													document.getElementById('register-link').style.display = 'none';
+													document.getElementById('forgot-link').style.display = 'none';
+													document.getElementById('profile-link').style.display = 'block';
+													document.getElementById('logout-link').style.display = 'block';
+													document.getElementById('admin-link').style.display = 'none';
+												}
+											})
+											.catch(error => {
+												console.error('Lỗi khi tải thông tin người dùng:', error);
+											});
 
 										// Xử lý sự kiện đăng xuất
 										document.getElementById('logout-btn').addEventListener('click', function () {

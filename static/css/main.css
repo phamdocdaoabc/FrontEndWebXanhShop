@@ -5893,7 +5893,8 @@ tbody tr td:last-child {
 .shop-widget-btn span {
   text-transform: capitalize;
 }
-/* .shop-widget-group {
+
+/*.shop-widget-group {
   display: -ms-grid;
   display: grid;
   grid-gap: 10px;
@@ -5902,7 +5903,8 @@ tbody tr td:last-child {
   -ms-grid-rows: auto;
   grid-template-rows: auto;
   margin: 15px 0px;
-} */
+}*/
+
 .shop-widget-group input {
   width: 100%;
   height: 45px;

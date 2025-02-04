@@ -1,69 +1,139 @@
-	<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta charset="UTF-8" />
 	<title>Greenty - Trang quản trị</title>
 	<meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
-	<link rel="icon" href="/assets/img/icon.ico" type="image/x-icon"/>
-	
+	<link rel="icon" href="/static/assets/img/icon.ico" type="image/x-icon" />
+
 	<!-- Fonts and icons -->
-	<script src="/assets/js/plugin/webfont/webfont.min.js"></script>
+	<script src="/static/assets/js/plugin/webfont/webfont.min.js"></script>
 	<script>
 		WebFont.load({
-			google: {"families":["Lato:300,400,700,900"]},
-			custom: {"families":["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['/assets/css/fonts.min.css']},
-			active: function() {
+			google: { "families": ["Lato:300,400,700,900"] },
+			custom: { "families": ["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['/static/assets/css/fonts.min.css'] },
+			active: function () {
 				sessionStorage.fonts = true;
 			}
 		});
 	</script>
 
 	<!-- CSS Files -->
-	<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-	<link rel="stylesheet" href="/assets/css/atlantis.min.css">
+	<link rel="stylesheet" href="/static/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/static/assets/css/atlantis.min.css">
 	<!-- CSS Just for demo purpose, don't include it in your project -->
-	<link rel="stylesheet" href="/assets/css/demo.css">
+	<link rel="stylesheet" href="/static/assets/css/demo.css">
 </head>
+
 <body>
 	<div class="wrapper">
-	<!-- Header -->
-	
-	<th:block th:replace="~{admin/fragments/header :: header}"></th:block>
-	
-	<!-- End Header -->
-	
-	<!-- Navbar -->
-	
-	<th:block th:replace="~{admin/fragments/navbar :: navbar}"></th:block>
-	
-	<!-- End Navbar -->
-	
-	<div class="main-panel">
-		<div class="content">
-			<div class="page-inner">
-				<div class="page-header">
-					<h4 class="page-title text-success">Quản lý sản phẩm</h4>
-					<ul class="breadcrumbs">
-						<li class="nav-home">
-							<a href="#">
-								<i class="flaticon-home"></i>
-							</a>
-						</li>
-						<li class="separator">
-							<i class="flaticon-right-arrow"></i>
-						</li>
-						<li class="nav-item">
-							<a th:href="@{/admin/home}">Trang chủ</a>
-						</li>
-						<li class="separator">
-							<i class="flaticon-right-arrow"></i>
-						</li>
-						<li class="nav-item">
-							<a href="#">Quản lý sản phẩm</a>
-						</li>
-					</ul>
-				</div>
+		<!-- Header -->
+		<header id="header-placeholder"></header>
+		<script>
+			// Load nội dung từ header.html
+			fetch('fragments/header.html')
+				.then(response => response.text())
+				.then(data => {
+					document.getElementById('header-placeholder').innerHTML = data;
+				})
+				.catch(error => console.error('Error loading header:', error));
+		</script>
+		<!-- End Header -->
+
+		<!-- Navbar -->
+		<header id="navbar-placeholder"></header>
+		<script>
+			function loadAdminProfile() {
+				const token = localStorage.getItem('token'); // Lấy token từ localStorage
+				console.log('Token:', token); // Hiển thị token ra console
+
+				// Lấy phần tử chứa thông tin user
+				const userProfileElement = document.getElementById('user-profile');
+				const userNameElement = document.getElementById('user-name');
+				const userAvatarElement = document.getElementById('user-avatar');
+
+				// Kiểm tra nếu không có token
+				if (!token) {
+					console.error('Bạn chưa đăng nhập!');
+					userProfileElement.style.display = 'none'; // Ẩn avatar và userName
+					return;
+				}
+
+				// Gọi API để lấy thông tin người dùng
+				fetch('http://localhost:9056/user-service/api/profile/infor', {
+					method: 'GET',
+					headers: { 'Authorization': 'Bearer ' + token }
+				})
+					.then(response => {
+						if (!response.ok) {
+							throw new Error('Không thể tải thông tin người dùng!');
+						}
+						return response.json();
+					})
+					.then(data => {
+						console.log('Thông tin người dùng:', data);
+
+						// Hiển thị thông tin người dùng
+						if (data.fullName) {
+							userNameElement.textContent = data.fullName;
+						} else {
+							userNameElement.textContent = "Admin";
+						}
+
+						// Hiển thị avatar
+						if (data.imageUrl) {
+							userAvatarElement.src = "data:image/png;base64," + data.imageUrl;
+						} else {
+							userAvatarElement.src = '/static/images/user.png'; // Avatar mặc định
+						}
+
+						// Hiển thị phần tử sau khi có dữ liệu
+						userProfileElement.style.display = 'block';
+					})
+					.catch(error => {
+						console.error('Lỗi khi tải thông tin người dùng:', error);
+						userAvatarElement.src = '/static/images/user.png'; // Avatar mặc định khi lỗi
+						userProfileElement.style.display = 'none'; // Ẩn thông tin nếu xảy ra lỗi
+					});
+			}
+			// Load nội dung từ navbar.html
+			fetch('fragments/navbar.html')
+				.then(response => response.text())
+				.then(data => {
+					document.getElementById('navbar-placeholder').innerHTML = data;
+					loadAdminProfile();
+				})
+				.catch(error => console.error('Error loading navbar:', error));
+		</script>
+		<!-- End Navbar -->
+
+		<div class="main-panel">
+			<div class="content">
+				<div class="page-inner">
+					<div class="page-header">
+						<h4 class="page-title text-success">Quản lý sản phẩm</h4>
+						<ul class="breadcrumbs">
+							<li class="nav-home">
+								<a href="#">
+									<i class="flaticon-home"></i>
+								</a>
+							</li>
+							<li class="separator">
+								<i class="flaticon-right-arrow"></i>
+							</li>
+							<li class="nav-item">
+								<a th:href="@{/admin/home}">Trang chủ</a>
+							</li>
+							<li class="separator">
+								<i class="flaticon-right-arrow"></i>
+							</li>
+							<li class="nav-item">
+								<a href="#">Quản lý sản phẩm</a>
+							</li>
+						</ul>
+					</div>
 					<div class="col-md-12">
 						<div class="card">
 							<div class="card-header">
@@ -73,130 +143,325 @@
 							</div>
 							<div class="card-header">
 								<section class="row">
-						           <div class="col-9 offset-1">
-						             <form th:action="@{/admin/updateProduct}" th:object="${product}" method="post" enctype="multipart/form-data">
-										<div class="row">
-										 	<div class="col-sm-12">
-							                       <label for="productId">ID <a style="color: red"><strong>*</strong></a></label>
-							                       <input type="hidden">
-							                       <input type="text" th:field="*{productId}" class="form-control" name="productId" id="productId" aria-describedby="categoryhelpId" placeholder="Mã sản phẩm ?" readonly="readonly">
-							               </div>
-											<div class="col-sm-12">
-												<div class="form-group form-group-default">
-													<label>Tên sản phẩm</label>
-													<input th:field="*{productName}" id="productName" type="text" class="form-control" placeholder="Tên sản phẩm...">
+									<div class="col-9 offset-1">
+										<form enctype="multipart/form-data">
+											<div class="row">
+												<div class="col-sm-12">
+													<label for="productId">ID <a
+															style="color: red"><strong>*</strong></a></label>
+													<input type="hidden">
+													<input type="text" class="form-control" name="productId"
+														id="productId" aria-describedby="categoryhelpId"
+														placeholder="Mã sản phẩm ?" readonly="readonly">
+												</div>
+												<div class="col-sm-12">
+													<div class="form-group form-group-default">
+														<label>Tên sản phẩm</label>
+														<input id="productName" type="text" class="form-control"
+															placeholder="Tên sản phẩm...">
+													</div>
+												</div>
+												<div class="col-md-6 pr-0">
+													<div class="form-group form-group-default">
+														<label>Thể loại</label>
+														<select class="form-control" name="category" id="categoryName">
+															<!-- Các option sẽ được thêm động từ script -->
+														</select>
+													</div>
+												</div>
+												<div class="col-md-6 pr-0">
+													<div class="form-group form-group-default">
+														<label>Đơn giá</label>
+														<input id="price" min=0 type="number" class="form-control"
+															placeholder="Đơn giá">
+													</div>
+												</div>
+												<div class="col-md-6 pr-0">
+													<div class="form-group form-group-default">
+														<label>Số lượng</label>
+														<input id="quantity" min=0 type="number" class="form-control"
+															placeholder="Số lượng">
+													</div>
+												</div>
+												<div class="col-md-6 pr-0">
+													<div class="form-group form-group-default">
+														<label>Giảm giá <i>(%)</i></label>
+														<input id="discount" min=0 type="number" class="form-control"
+															placeholder="giảm giá">
+													</div>
+												</div>
+												<div class="col-md-6 pr-0">
+													<div class="form-group form-group-default">
+														<label>Ngày thêm</label>
+														<input id="createdAt" type="date" class="form-control"
+															placeholder="ngày thêm">
+													</div>
+												</div>
+												<div class="col-md-6 pr-0">
+													<div class="form-group form-group-default">
+														<label>Xu hướng</label>
+														<select class="form-control" name="prouctType" id="productType">
+															<option value="new">Mới</option>
+															<option value="featured">Đặc sắc</option>
+															<option value="bestseller">Bán chạy</option>
+														</select>
+													</div>
+												</div>
+												<div class="col-sm-12">
+													<div class="form-group form-group-default">
+														<label>Images</label>
+														<div id="currentImages"
+															style="display: flex; gap: 10px; flex-wrap: wrap;">
+															<!-- Hình ảnh sẽ được thêm động -->
+														</div>
+														<input type="file" id="productImage" name="images" multiple
+															class="form-control mt-3">
+													</div>
+												</div>
+												<div class="col-sm-12">
+													<div class="form-group form-group-default">
+														<label>Mô tả sản phẩm</label>
+														<textarea id="description" class="form-control"
+															placeholder="Mô tả sản phẩm"></textarea>
+													</div>
 												</div>
 											</div>
-											<div class="col-md-6 pr-0">
-												<div class="form-group form-group-default">
-													<label>Thể loại</label>
-													<select class="form-control"
-														 name="category" th:field="*{category.categoryId}" id="categoryId">
-														<option th:each="item : ${categoryList}"
-		  													th:value="${item.categoryId}" th:text="${item.categoryName}"
-															th:selected="${item.categoryId == product.category.categoryId}">
-															Category Name
-														</option>
-													</select>
-												</div>
+											<div class="modal-footer no-bd">
+												<button type="submit" id="updateBtn" class="btn btn-primary">Cập
+													nhật</button>
+												<button type="submit" class="btn btn-danger" data-dismiss="modal"
+													formaction="products.html" formmethod="get">Hủy</button>
 											</div>
-											<div class="col-md-6 pr-0">
-												<div class="form-group form-group-default">
-													<label>Đơn giá</label>
-													<input th:field="*{price}" id="price" min = 0 type="number" class="form-control" placeholder="Đơn giá">
-												</div>
-											</div>
-											<div class="col-md-6 pr-0">
-												<div class="form-group form-group-default">
-													<label>Số lượng</label>
-													<input th:field="*{quantity}" id="quantity" min = 0 type="number" class="form-control" placeholder="Số lượng">
-												</div>
-											</div>
-											<div class="col-md-6 pr-0">
-												<div class="form-group form-group-default">
-													<label>Giảm giá</label>
-													<input th:field="*{discount}" id="discount" min = 0 type="number" class="form-control" placeholder="giảm giá">
-												</div>
-											</div>
-											<div class="col-md-6 pr-0">
-												<div class="form-group form-group-default">
-													<label>Ngày thêm</label>
-													<input th:field="*{enteredDate}" id="enteredDate" type="date" class="form-control" placeholder="ngày thêm">
-												</div>
-											</div>
-											<div class="col-sm-12">
-												<div class="form-group form-group-default">
-													<label>Images</label>
-													<input type="file" id="productImage" name="file" class="form-control">
-												</div>
-											</div>
-											<div class="col-sm-12">
-												<div class="form-group form-group-default">
-													<label>Mô tả sản phẩm</label>
-													<textarea th:field="*{description}" id="description" class="form-control" placeholder="Mô tả sản phẩm"></textarea>
-												</div>
-											</div>
-										</div>
-										<div class="modal-footer no-bd">
-											<button type="submit" id="" class="btn btn-primary">Cập nhật</button>
-											<button type="submit" class="btn btn-danger" data-dismiss="modal" formaction="/admin/products" formmethod="get">Hủy</button>
-										</div>
-									</form>
-						           </div>
+										</form>
+									</div>
 								</section>
+								<script>
+									document.addEventListener("DOMContentLoaded", function () {
+										const urlParams = new URLSearchParams(window.location.search);
+										const productId = urlParams.get("productId");
+
+										if (!productId) {
+											alert("Không tìm thấy productId trong URL.");
+											return;
+										}
+
+										const updateBtn = document.getElementById("updateBtn");
+
+										// Gắn sự kiện click vào nút
+										updateBtn.addEventListener("click", function (event) {
+											const productId = document.getElementById("productId").value; // Đảm bảo có ID sản phẩm
+											if (!productId) {
+												alert("Không tìm thấy ID sản phẩm. Vui lòng kiểm tra lại.");
+												return;
+											}
+
+											// Gọi hàm cập nhật sản phẩm
+											updateProduct(event, productId);
+										});
+
+										// Hiển thị thông tin sản phẩm
+										async function loadProduct() {
+											try {
+												const categorySelect = document.getElementById("categoryName");
+												const response = await fetch(`http://localhost:9056/product-service/api/products/${productId}`);
+												if (!response.ok) throw new Error("Không thể tải thông tin sản phẩm.");
+
+												const data = await response.json();
+												document.getElementById("productId").value = productId;
+												document.getElementById("productName").value = data.productName;
+												document.getElementById("price").value = data.price;
+												document.getElementById("quantity").value = data.quantity;
+												document.getElementById("discount").value = data.discount;
+												document.getElementById("createdAt").value = data.createdAt;
+												document.getElementById("description").value = data.description;
+
+												const productTypeSelect = document.getElementById("productType");
+												productTypeSelect.value = data.productType;
+
+												// Hiển thị hình ảnh hiện tại
+												const imageContainer = document.getElementById("currentImages");
+												imageContainer.innerHTML = ""; // Xóa các ảnh cũ (nếu có)
+
+												data.imageUrl.forEach(imageUrl => {
+													const imageWrapper = document.createElement("div");
+													imageWrapper.style = "position: relative; display: inline-block;";
+
+													const imgElement = document.createElement("img");
+													imgElement.src = imageUrl;
+													imgElement.alt = "Product Image";
+													imgElement.style = "width: 100px; height: 100px; object-fit: cover; border: 1px solid #ccc;";
+
+													const removeButton = document.createElement("span");
+													removeButton.innerHTML = "&#10006;"; // Dấu "x"
+													removeButton.style = "position: absolute; top: 0; right: 0; background-color: red; color: white; font-size: 16px; padding: 2px; cursor: pointer; border-radius: 50%;";
+
+													removeButton.onclick = function () {
+														// Xử lý loại bỏ ảnh khi nhấn vào dấu "x"
+														imageWrapper.remove();
+														// Xóa ảnh khỏi danh sách ảnh
+														data.images.splice(index, 1);
+													};
+
+													imageWrapper.appendChild(imgElement);
+													imageWrapper.appendChild(removeButton);
+													imageContainer.appendChild(imageWrapper);
+												});
+
+												// Tải danh sách thể loại
+												await loadCategories(data.categoryName);
+											} catch (error) {
+												alert(error.message);
+											}
+										}
+
+										// Danh sách thể loại
+										async function loadCategories(currentCategory) {
+											try {
+												const categorySelect = document.getElementById("categoryName");
+
+												const response = await fetch("http://localhost:9056/product-service/api/categories/count");
+												if (!response.ok) throw new Error("Không thể tải danh sách thể loại.");
+
+												const categories = await response.json();
+
+												// Xóa các `option` hiện có
+												categorySelect.innerHTML = "";
+
+												// Thêm các thể loại vào danh sách
+												categories.forEach(category => {
+													const option = document.createElement("option");
+													option.value = category.categoryName;
+													option.textContent = category.categoryName;
+
+													// Chọn thể loại hiện tại
+													if (category.categoryName === currentCategory) {
+														option.selected = true;
+													}
+
+													categorySelect.appendChild(option);
+												});
+											} catch (error) {
+												alert(error.message);
+											}
+										}
+
+										// Cập nhật thông tin sản phẩm
+										async function updateProduct(event, productId) {
+											event.preventDefault();
+
+											// Gọi API cập nhật thông tin sản phẩm
+											const productRequest = {
+												productName: document.getElementById("productName").value,
+												categoryName: document.getElementById("categoryName").value,
+												price: parseFloat(document.getElementById("price").value),
+												quantity: parseInt(document.getElementById("quantity").value),
+												discount: parseFloat(document.getElementById("discount").value),
+												createdAt: document.getElementById("createdAt").value,
+												description: document.getElementById("description").value,
+												productType: document.getElementById("productType").value,
+											};
+
+											try {
+												const productResponse = await fetch(`http://localhost:9056/product-service/api/products/updateProduct/${productId}`, {
+													method: "PUT",
+													headers: {
+														"Content-Type": "application/json"
+													},
+													body: JSON.stringify(productRequest)
+												});
+
+												if (!productResponse.ok) throw new Error("Cập nhật thông tin sản phẩm thất bại.");
+
+												alert("Cập nhật thông tin sản phẩm thành công.");
+												loadProduct();
+											} catch (error) {
+												alert(error.message);
+												return;
+											}
+
+											// Gọi API cập nhật hình ảnh nếu có hình ảnh mới
+											const fileInput = document.getElementById("productImage");
+											if (fileInput.files.length > 0) {
+												const formData = new FormData();
+												for (let file of fileInput.files) {
+													formData.append("images", file);
+												}
+
+												try {
+													const imageResponse = await fetch(`http://localhost:9056/product-service/api/products/${productId}/images`, {
+														method: "PUT",
+														body: formData,
+													});
+													if (!imageResponse.ok) throw new Error("Cập nhật hình ảnh thất bại.");
+													alert("Cập nhật hình ảnh thành công.");
+													loadProduct();
+												} catch (error) {
+													alert(error.message);
+												}
+											}
+										}
+
+										// Gán sự kiện
+										document.querySelector("form").addEventListener("submit", updateProduct);
+										// Gọi các hàm khởi tạo
+										loadProduct();
+									});
+								</script>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		
-		<footer class="footer">
-			<div class="container-fluid">
-				<nav class="pull-left">
-					<ul class="nav">
-						<li class="nav-item">
-							<a class="nav-link" href="javascript:void(0);">
-								GREENY-SHOP
-							</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="javascript:void(0);">
-								Help
-							</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="javascript:void(0);">
-								Licenses
-							</a>
-						</li>
-					</ul>
-				</nav>
-				<div class="copyright ml-auto">
-					2024, made with <i class="fa fa-heart heart text-danger"></i> by <a href="javascript:void(0);">GREENTY-SHOP</a>
-				</div>				
-			</div>
-		</footer>
-	</div>
-	
-	
-	
+
+			<footer class="footer">
+				<div class="container-fluid">
+					<nav class="pull-left">
+						<ul class="nav">
+							<li class="nav-item">
+								<a class="nav-link" href="javascript:void(0);">
+									GREENY-SHOP
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="javascript:void(0);">
+									Help
+								</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="javascript:void(0);">
+									Licenses
+								</a>
+							</li>
+						</ul>
+					</nav>
+					<div class="copyright ml-auto">
+						2024, made with <i class="fa fa-heart heart text-danger"></i> by <a
+							href="javascript:void(0);">GREENTY-SHOP</a>
+					</div>
+				</div>
+			</footer>
+		</div>
+
+
+
 
 	</div>
 	<!--   Core JS Files   -->
-	<script src="/assets/js/core/jquery.3.2.1.min.js"></script>
-	<script src="/assets/js/core/popper.min.js"></script>
-	<script src="/assets/js/core/bootstrap.min.js"></script>
+	<script src="/static/assets/js/core/jquery.3.2.1.min.js"></script>
+	<script src="/static/assets/js/core/popper.min.js"></script>
+	<script src="/static/assets/js/core/bootstrap.min.js"></script>
 	<!-- jQuery UI -->
-	<script src="/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
-	<script src="/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
-	
+	<script src="/static/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+	<script src="/static/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+
 	<!-- jQuery Scrollbar -->
-	<script src="/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+	<script src="/static/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
 	<!-- Datatables -->
-	<script src="/assets/js/plugin/datatables/datatables.min.js"></script>
+	<script src="/static/assets/js/plugin/datatables/datatables.min.js"></script>
 	<!-- Atlantis JS -->
-	<script src="/assets/js/atlantis.min.js"></script>
+	<script src="/static/assets/js/atlantis.min.js"></script>
 	<!-- Atlantis DEMO methods, don't include it in your project! -->
-	<script src="/assets/js/setting-demo2.js"></script>
+	<script src="/static/assets/js/setting-demo2.js"></script>
 </body>
+
 </html>
