@@ -124,7 +124,7 @@
 								<i class="flaticon-right-arrow"></i>
 							</li>
 							<li class="nav-item">
-								<a th:href="@{/admin/home}">Trang chủ</a>
+								<a href="templates/admin/index.html">Trang chủ</a>
 							</li>
 							<li class="separator">
 								<i class="flaticon-right-arrow"></i>
@@ -137,9 +137,25 @@
 					<div class="col-md-12">
 						<div class="card">
 							<div class="card-header">
-								<div class="d-flex align-items-center">
-									<h4 class="card-title" style="text-decoration: underline;">Quản Lý Thống Kê</h4>
-								</div>
+								<div class="d-flex align-items-center justify-content-between">
+									<h4 class="card-title" style="text-decoration: underline;">Quản Lý Thống Kê Đơn Hàng</h4>
+									<div class="d-flex">
+										<!-- Chọn ngày bắt đầu -->
+										<div class="form-group mb-0 mr-2">
+											<label for="startDate">Ngày bắt đầu:</label>
+											<input type="date" id="startDate" class="form-control">
+										</div>
+							
+										<!-- Chọn ngày kết thúc -->
+										<div class="form-group mb-0 mr-2">
+											<label for="endDate">Ngày kết thúc:</label>
+											<input type="date" id="endDate" class="form-control">
+										</div>
+							
+										<!-- Nút Thống Kê -->
+										<button id="btnStatistic" class="btn btn-primary mt-auto">Thống kê</button>
+									</div>			
+								</div>								
 							</div>
 							<div class="card-body">
 								<div class="table-responsive">
@@ -147,8 +163,8 @@
 										<thead>
 											<tr>
 												<th>STT</th>
-												<th>Nhóm</th>
-												<th>Số lượng bán ra</th>
+												<th>Mã đơn hàng</th>
+												<th>Khách Hàng</th>
 												<th>Doanh thu</th>
 												<th>Giá trung bình</th>
 												<th>Giá thấp nhất</th>
@@ -158,7 +174,7 @@
 										<tfoot>
 											<tr>
 												<th>#</th>
-												<th>Nhóm</th>
+												<th>Tên sản phẩm</th>
 												<th>Số lượng bán ra</th>
 												<th>Doanh thu</th>
 												<th>Giá trung bình</th>
@@ -167,19 +183,7 @@
 											</tr>
 										</tfoot>
 										<tbody>
-											<tr th:each="item, iState : ${listReportCommon}">
-												<td>[[${iState.index + 1}]]</td>
-												<td>[[${item[0]}]]</td>
-												<td>[[${item[1]}]]</td>
-												<td>[[${#numbers.formatDecimal(item[2], 1, 'DEFAULT', 0, 'DEFAULT')} + '
-													đ']]</td>
-												<td>[[${#numbers.formatDecimal(item[3], 1, 'DEFAULT', 0, 'DEFAULT')} + '
-													đ']]</td>
-												<td>[[${#numbers.formatDecimal(item[4], 1, 'DEFAULT', 0, 'DEFAULT')} + '
-													đ']]</td>
-												<td>[[${#numbers.formatDecimal(item[5], 1, 'DEFAULT', 0, 'DEFAULT')} + '
-													đ']]</td>
-											</tr>
+											
 										</tbody>
 									</table>
 								</div>

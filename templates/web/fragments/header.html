@@ -114,6 +114,8 @@
 
 					}
 				</script>
+				
+				<!--Tim kiem-->
 				<form th:action="@{/searchProduct}" class="header-form">
 					<input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm..."
 						autocomplete="off" />
@@ -128,7 +130,7 @@
 							<i class="fas fa-user"></i>
 						</a>
 					</th:block>
-					<a href="@{/favorite}" class="header-widget" title="Yêu thích">
+					<a href="/templates/web/favorite.html" class="header-widget" title="Yêu thích">
 						<i class="fas fa-heart"></i><sup id="totalSave">0</sup>
 					</a>
 					<a class="header-widget header-cart" id="cartIcon" title="Giỏ hàng">
