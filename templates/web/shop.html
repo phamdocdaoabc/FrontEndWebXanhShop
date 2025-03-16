@@ -137,9 +137,10 @@
                     					<div class="cart-action-group">
                         					<div class="product-action">
                             					<label>Số lượng : </label>
-                            					<input class="action-input" title="Quantity Number" type="number" min="1" value="${item.quantity}" style="font-weight: bold;"/>
+                            					<input class="action-input" title="Quantity Number" type="number" min="1" value="${item.quantity}" style="font-weight: bold;"
+												onchange="updatePrice(this, ${item.price}, ${item.discount}, ${item.productId})"/>
                         						</div>
-                        						<h6>${formatCurrency((item.price - item.price * (item.discount / 100)) * item.quantity)} đ</h6>
+                        						<h6 id="price-${item.productId}">${formatCurrency((item.price - item.price * (item.discount / 100)) * item.quantity)} đ</h6>
                         						<button class="remove-item-btn" onclick="removeItemFromCart(${item.productId})">Xóa</button>
                     							</div>
                 							</div>
@@ -149,6 +150,21 @@
 					.join('');
 				cartFooter.style.display = 'block';
 			}
+		}
+
+		function updatePrice(input, price, discount, productId) {
+			let quantity = parseInt(input.value);
+			if (quantity < 1) {
+				quantity = 1; // Đảm bảo số lượng không nhỏ hơn 1
+				input.value = 1;
+			}
+
+			// Tính toán giá mới
+			let discountedPrice = price - (price * (discount / 100));
+			let totalPrice = discountedPrice * quantity;
+
+			// Hiển thị giá mới
+			document.getElementById(`price-${productId}`).innerText = totalPrice.toLocaleString('vi-VN') + " đ";
 		}
 
 		// Định dạng tiền tệ

@@ -30,99 +30,99 @@
     <!--************************************
 				Header Start
 		*************************************-->
-    <!-- Header sẽ được load ở đây -->
-    <header id="header-placeholder"></header>
-    <script>
-        // Xóa sản phẩm khỏi giỏ hàng
-        function removeItemFromCart(productId) {
-            const token = localStorage.getItem("token");
+	<!-- Header sẽ được load ở đây -->
+	<header id="header-placeholder"></header>
+	<script>
+		// Xóa sản phẩm khỏi giỏ hàng
+		function removeItemFromCart(productId) {
+			const token = localStorage.getItem("token");
 
-            // Lấy userId từ API profile
-            fetch("http://localhost:9056/user-service/api/profile/infor", {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-                .then(response => response.json())
-                .then(userInfo => {
-                    const userId = userInfo.userId; // Lấy userId từ response
+			// Lấy userId từ API profile
+			fetch("http://localhost:9056/user-service/api/profile/infor", {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+				.then(response => response.json())
+				.then(userInfo => {
+					const userId = userInfo.userId; // Lấy userId từ response
 
-                    // Sau khi có userId, gọi API xóa sản phẩm khỏi giỏ hàng
-                    return fetch(`http://localhost:9056/order-service/api/cart/remove?userId=${userId}&productId=${productId}`, {
-                        method: "DELETE",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Lỗi khi xóa sản phẩm.");
-                    }
+					// Sau khi có userId, gọi API xóa sản phẩm khỏi giỏ hàng
+					return fetch(`http://localhost:9056/order-service/api/cart/remove?userId=${userId}&productId=${productId}`, {
+						method: "DELETE",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
+					});
+				})
+				.then(response => {
+					if (!response.ok) {
+						throw new Error("Lỗi khi xóa sản phẩm.");
+					}
 
-                    // Xóa sản phẩm khỏi giao diện
-                    const productElement = document.querySelector(`#cart-item-${productId}`);
-                    if (productElement) {
-                        productElement.remove();
-                    }
+					// Xóa sản phẩm khỏi giao diện
+					const productElement = document.querySelector(`#cart-item-${productId}`);
+					if (productElement) {
+						productElement.remove();
+					}
 
-                    // Kiểm tra nếu giỏ hàng trống
-                    const cartItems = document.querySelectorAll(".cart-item");
-                    if (cartItems.length === 0) {
-                        document.getElementById("emptyCartMessage").style.display = "block";
-                        document.getElementById("cartFooter").style.display = "none";
-                        document.getElementById("cartTotalItems").textContent = "Tổng số lượng giỏ hàng (0)";
-                    } else {
-                        // Cập nhật lại tổng số lượng giỏ hàng
-                        const totalCartItems = parseInt(document.getElementById("totalCartItems3").textContent.match(/\d+/)) - 1;
-                        document.getElementById("totalCartItems3").textContent = `Tổng số lượng giỏ hàng: ${totalCartItems}`;
-                        document.getElementById("cartTotalItems").textContent = `Tổng số lượng giỏ hàng (${totalCartItems})`;
-                    }
-                })
-                .catch(error => {
-                    console.error("Lỗi khi xóa sản phẩm:", error);
-                });
-        }
+					// Kiểm tra nếu giỏ hàng trống
+					const cartItems = document.querySelectorAll(".cart-item");
+					if (cartItems.length === 0) {
+						document.getElementById("emptyCartMessage").style.display = "block";
+						document.getElementById("cartFooter").style.display = "none";
+						document.getElementById("cartTotalItems").textContent = "Tổng số lượng giỏ hàng (0)";
+					} else {
+						// Cập nhật lại tổng số lượng giỏ hàng
+						const totalCartItems = parseInt(document.getElementById("totalCartItems3").textContent.match(/\d+/)) - 1;
+						document.getElementById("totalCartItems3").textContent = `Tổng số lượng giỏ hàng: ${totalCartItems}`;
+						document.getElementById("cartTotalItems").textContent = `Tổng số lượng giỏ hàng (${totalCartItems})`;
+					}
+				})
+				.catch(error => {
+					console.error("Lỗi khi xóa sản phẩm:", error);
+				});
+		}
 
-        // Hàm xử lý giỏ hàng
-        function loadOpenCarItem() {
-            const cartIcon = document.getElementById('cartIcon'); // Biểu tượng giỏ hàng
-            const cartSidebar = document.getElementById('cartSidebar'); // Sidebar giỏ hàng
-            const closeCartSidebar = document.getElementById('closeCartSidebar'); // Nút đóng
+		// Hàm xử lý giỏ hàng
+		function loadOpenCarItem() {
+			const cartIcon = document.getElementById('cartIcon'); // Biểu tượng giỏ hàng
+			const cartSidebar = document.getElementById('cartSidebar'); // Sidebar giỏ hàng
+			const closeCartSidebar = document.getElementById('closeCartSidebar'); // Nút đóng
 
-            // Mở giỏ hàng
-            cartIcon.addEventListener('click', function () {
-                cartSidebar.classList.add('active');
-            });
+			// Mở giỏ hàng
+			cartIcon.addEventListener('click', function () {
+				cartSidebar.classList.add('active');
+			});
 
-            // Đóng giỏ hàng
-            closeCartSidebar.addEventListener('click', function () {
-                cartSidebar.classList.remove('active');
-            });
+			// Đóng giỏ hàng
+			closeCartSidebar.addEventListener('click', function () {
+				cartSidebar.classList.remove('active');
+			});
 
-            // Đóng khi click ra ngoài
-            document.addEventListener('click', function (event) {
-                if (!cartSidebar.contains(event.target) && !cartIcon.contains(event.target)) {
-                    cartSidebar.classList.remove('active');
-                }
-            });
-        }
-        // Hiển thị chi tiết giỏ hàng
-        function renderCartDetails(cart) {
-            const totalItems = cart.totalItems || 0;
-            const cartItems = cart.cartItems || [];
-            const cartList = document.getElementById('cartList');
-            const emptyCartMessage = document.getElementById('emptyCartMessage');
-            const cartFooter = document.getElementById('cartFooter');
+			// Đóng khi click ra ngoài
+			document.addEventListener('click', function (event) {
+				if (!cartSidebar.contains(event.target) && !cartIcon.contains(event.target)) {
+					cartSidebar.classList.remove('active');
+				}
+			});
+		}
+		// Hiển thị chi tiết giỏ hàng
+		function renderCartDetails(cart) {
+			const totalItems = cart.totalItems || 0;
+			const cartItems = cart.cartItems || [];
+			const cartList = document.getElementById('cartList');
+			const emptyCartMessage = document.getElementById('emptyCartMessage');
+			const cartFooter = document.getElementById('cartFooter');
 
-            if (totalItems === 0) {
-                emptyCartMessage.style.display = 'block';
-                cartList.innerHTML = '';
-                cartFooter.style.display = 'none';
-            } else {
-                emptyCartMessage.style.display = 'none';
-                cartList.innerHTML = cartItems.map(item => `
+			if (totalItems === 0) {
+				emptyCartMessage.style.display = 'block';
+				cartList.innerHTML = '';
+				cartFooter.style.display = 'none';
+			} else {
+				emptyCartMessage.style.display = 'none';
+				cartList.innerHTML = cartItems.map(item => `
                   <li class="cart-item" id="cart-item-${item.productId}">
                 					<div class="cart-media">
                     					<a href="/templates/web/productDetail.html?productId=${item.productId}">
@@ -138,187 +138,204 @@
                     					<div class="cart-action-group">
                         					<div class="product-action">
                             					<label>Số lượng : </label>
-                            					<input class="action-input" title="Quantity Number" type="number" min="1" value="${item.quantity}" style="font-weight: bold;"/>
+                            					<input class="action-input" title="Quantity Number" type="number" min="1" value="${item.quantity}" style="font-weight: bold;"
+												onchange="updatePrice(this, ${item.price}, ${item.discount}, ${item.productId})"/>
                         						</div>
-                        						<h6>${formatCurrency((item.price - item.price * (item.discount / 100)) * item.quantity)} đ</h6>
+                        						<h6 id="price-${item.productId}">${formatCurrency((item.price - item.price * (item.discount / 100)) * item.quantity)} đ</h6>
                         						<button class="remove-item-btn" onclick="removeItemFromCart(${item.productId})">Xóa</button>
                     							</div>
                 							</div>
             					</li>
         						`
-                )
-                    .join('');
-                cartFooter.style.display = 'block';
-            }
-        }
+				)
+					.join('');
+				cartFooter.style.display = 'block';
+			}
+		}
 
-        // Định dạng tiền tệ
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-        }
+		function updatePrice(input, price, discount, productId) {
+			let quantity = parseInt(input.value);
+			if (quantity < 1) {
+				quantity = 1; // Đảm bảo số lượng không nhỏ hơn 1
+				input.value = 1;
+			}
 
-        // Tải chi tiết giỏ hàng khi tải trang
-        document.addEventListener('DOMContentLoaded', fetchCartDetails);
+			// Tính toán giá mới
+			let discountedPrice = price - (price * (discount / 100));
+			let totalPrice = discountedPrice * quantity;
 
-        // Hàm tải giỏ hàng từ API
-        async function fetchCartDetails() {
-            try {
-                const token = localStorage.getItem('token');
-                const userInfoResponse = await fetch('http://localhost:9056/user-service/api/profile/infor', {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+			// Hiển thị giá mới
+			document.getElementById(`price-${productId}`).innerText = totalPrice.toLocaleString('vi-VN') + " đ";
+		}
 
-                if (!userInfoResponse.ok) throw new Error('Không thể lấy thông tin người dùng.');
+		// Định dạng tiền tệ
+		function formatCurrency(amount) {
+			return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+		}
 
-                const userInfo = await userInfoResponse.json();
-                const userId = userInfo.userId;
+		// Tải chi tiết giỏ hàng khi tải trang
+		document.addEventListener('DOMContentLoaded', fetchCartDetails);
 
-                const cartResponse = await fetch(`http://localhost:9056/order-service/api/cart/${userId}`, {
-                    method: 'GET'
-                });
+		// Hàm tải giỏ hàng từ API
+		async function fetchCartDetails() {
+			try {
+				const token = localStorage.getItem('token');
+				const userInfoResponse = await fetch('http://localhost:9056/user-service/api/profile/infor', {
+					method: 'GET',
+					headers: { 'Authorization': `Bearer ${token}` }
+				});
 
-                if (!cartResponse.ok) throw new Error('Không thể lấy thông tin giỏ hàng.');
+				if (!userInfoResponse.ok) throw new Error('Không thể lấy thông tin người dùng.');
 
-                const cartData = await cartResponse.json();
-                renderCartDetails(cartData);
-                let cartItemCount = cartData.totalItems;
-                document.getElementById("totalCartItems2").textContent = cartItemCount;
-                const cartItemTotal = document.getElementById("totalCartItems3");
-                cartItemTotal.textContent = `Tổng số lượng giỏ hàng: ${cartData.totalItems}`;
-            } catch (error) {
-                console.error('Lỗi khi tải giỏ hàng:', error);
-                document.getElementById('emptyCartMessage').innerHTML = `
+				const userInfo = await userInfoResponse.json();
+				const userId = userInfo.userId;
+
+				const cartResponse = await fetch(`http://localhost:9056/order-service/api/cart/${userId}`, {
+					method: 'GET'
+				});
+
+				if (!cartResponse.ok) throw new Error('Không thể lấy thông tin giỏ hàng.');
+
+				const cartData = await cartResponse.json();
+				renderCartDetails(cartData);
+				let cartItemCount = cartData.totalItems;
+				document.getElementById("totalCartItems2").textContent = cartItemCount;
+				const cartItemTotal = document.getElementById("totalCartItems3");
+				cartItemTotal.textContent = `Tổng số lượng giỏ hàng: ${cartData.totalItems}`;
+			} catch (error) {
+				console.error('Lỗi khi tải giỏ hàng:', error);
+				document.getElementById('emptyCartMessage').innerHTML = `
                     <h4 style="color: #119744">Không thể tải thông tin giỏ hàng!</h4>
                     <h5 style="color: #119744">Vui lòng thử lại sau!</h5>
                 `;
-            }
-        }
+			}
+		}
 
 
-        // Đảm bảo hàm loadUserProfile được khai báo trước
-        function loadUserProfile() {
-            const token = localStorage.getItem('token');
-            // Lấy phần tử chứa thông tin user
-            const userProfileElement = document.getElementById('user-profile');
-            if (!token) {
-                console.error('Bạn chưa đăng nhập!');
-                userProfileElement.style.display = 'none'; // Ẩn avatar và userName
-                return;
-            }
+		// Đảm bảo hàm loadUserProfile được khai báo trước
+		function loadUserProfile() {
+			const token = localStorage.getItem('token');
+			// Lấy phần tử chứa thông tin user
+			const userProfileElement = document.getElementById('user-profile');
+			if (!token) {
+				console.error('Bạn chưa đăng nhập!');
+				userProfileElement.style.display = 'none'; // Ẩn avatar và userName
+				return;
+			}
 
-            fetch('http://localhost:9056/user-service/api/profile/infor', {
-                method: 'GET',
-                headers: { 'Authorization': 'Bearer ' + token }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    const userNameElement = document.getElementById('user-name');
-                    const userAvatarElement = document.getElementById('user-avatar');
+			fetch('http://localhost:9056/user-service/api/profile/infor', {
+				method: 'GET',
+				headers: { 'Authorization': 'Bearer ' + token }
+			})
+				.then(response => response.json())
+				.then(data => {
+					const userNameElement = document.getElementById('user-name');
+					const userAvatarElement = document.getElementById('user-avatar');
 
-                    if (data.fullName) userNameElement.textContent = data.fullName;
-                    if (data.imageUrl) {
-                        userAvatarElement.src = "data:image/jpeg;base64," + data.imageUrl;
-                    } else {
-                        userAvatarElement.src = '/static/images/user.png';
-                    }
-                    // Sau khi load thành công, hiển thị avatar và userName
-                    userProfileElement.style.display = 'block';
+					if (data.fullName) userNameElement.textContent = data.fullName;
+					if (data.imageUrl) {
+						userAvatarElement.src = "data:image/jpeg;base64," + data.imageUrl;
+					} else {
+						userAvatarElement.src = '/static/images/user.png';
+					}
+					// Sau khi load thành công, hiển thị avatar và userName
+					userProfileElement.style.display = 'block';
 
-                })
-                .catch(error => console.error('Lỗi khi tải thông tin người dùng:', error));
-            userProfileElement.style.display = 'none'; // Ẩn nếu có lỗi
-        }
+				})
+				.catch(error => console.error('Lỗi khi tải thông tin người dùng:', error));
+			userProfileElement.style.display = 'none'; // Ẩn nếu có lỗi
+		}
 
-        // Hiển thị nút menu Tài khoản
-        function initHeaderScripts() {
-            const token = localStorage.getItem('token');
+		// Hiển thị nút menu Tài khoản
+		function initHeaderScripts() {
+			const token = localStorage.getItem('token');
 
-            // Nếu không có token, hiển thị các mục liên quan đến đăng nhập
-            if (!token) {
-                document.getElementById('login-link').style.display = 'block';
-                document.getElementById('register-link').style.display = 'block';
-                document.getElementById('forgot-link').style.display = 'block';
-                document.getElementById('profile-link').style.display = 'none';
-                document.getElementById('logout-link').style.display = 'none';
-                document.getElementById('admin-link').style.display = 'none';
-                return;
-            }
+			// Nếu không có token, hiển thị các mục liên quan đến đăng nhập
+			if (!token) {
+				document.getElementById('login-link').style.display = 'block';
+				document.getElementById('register-link').style.display = 'block';
+				document.getElementById('forgot-link').style.display = 'block';
+				document.getElementById('profile-link').style.display = 'none';
+				document.getElementById('logout-link').style.display = 'none';
+				document.getElementById('admin-link').style.display = 'none';
+				return;
+			}
 
-            // Gọi API để lấy thông tin người dùng
-            fetch('http://localhost:9056/user-service/api/profile/infor', {
-                method: 'GET',
-                headers: { 'Authorization': 'Bearer ' + token }
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Không thể tải thông tin người dùng!');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Thông tin người dùng:', data);
+			// Gọi API để lấy thông tin người dùng
+			fetch('http://localhost:9056/user-service/api/profile/infor', {
+				method: 'GET',
+				headers: { 'Authorization': 'Bearer ' + token }
+			})
+				.then(response => {
+					if (!response.ok) {
+						throw new Error('Không thể tải thông tin người dùng!');
+					}
+					return response.json();
+				})
+				.then(data => {
+					console.log('Thông tin người dùng:', data);
 
-                    // Hiển thị các mục dựa trên vai trò
-                    if (data.role === "ROLE_ADMIN") {
-                        document.getElementById('login-link').style.display = 'none';
-                        document.getElementById('register-link').style.display = 'none';
-                        document.getElementById('forgot-link').style.display = 'none';
-                        document.getElementById('profile-link').style.display = 'block';
-                        document.getElementById('logout-link').style.display = 'block';
-                        document.getElementById('admin-link').style.display = 'block';
-                    } else if (data.role === "ROLE_USER") {
-                        document.getElementById('login-link').style.display = 'none';
-                        document.getElementById('register-link').style.display = 'none';
-                        document.getElementById('forgot-link').style.display = 'none';
-                        document.getElementById('profile-link').style.display = 'block';
-                        document.getElementById('logout-link').style.display = 'block';
-                        document.getElementById('admin-link').style.display = 'none';
-                    }
-                })
-                .catch(error => {
-                    console.error('Lỗi khi tải thông tin người dùng:', error);
-                });
+					// Hiển thị các mục dựa trên vai trò
+					if (data.role === "ROLE_ADMIN") {
+						document.getElementById('login-link').style.display = 'none';
+						document.getElementById('register-link').style.display = 'none';
+						document.getElementById('forgot-link').style.display = 'none';
+						document.getElementById('profile-link').style.display = 'block';
+						document.getElementById('logout-link').style.display = 'block';
+						document.getElementById('admin-link').style.display = 'block';
+					} else if (data.role === "ROLE_USER") {
+						document.getElementById('login-link').style.display = 'none';
+						document.getElementById('register-link').style.display = 'none';
+						document.getElementById('forgot-link').style.display = 'none';
+						document.getElementById('profile-link').style.display = 'block';
+						document.getElementById('logout-link').style.display = 'block';
+						document.getElementById('admin-link').style.display = 'none';
+					}
+				})
+				.catch(error => {
+					console.error('Lỗi khi tải thông tin người dùng:', error);
+				});
 
-            document.getElementById('logout-btn').addEventListener('click', function () {
-                localStorage.removeItem('token');
-                window.location.href = '/templates/web/login.html';
-            });
-        }
-        function loadListCategory() {
-            fetch('http://localhost:9056/product-service/api/categories/count')
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data); // Xem cấu trúc trả về
-                    const categoryList = document.getElementById('category-list');
-                    categoryList.innerHTML = ''; // Xóa danh sách trước khi thêm mới
+			document.getElementById('logout-btn').addEventListener('click', function () {
+				localStorage.removeItem('token');
+				window.location.href = '/templates/web/login.html';
+			});
+		}
 
-                    data.forEach(item => {
-                        const listItem = document.createElement('li');
-                        const link = document.createElement('a');
-                        link.href = `/templates/web/shop.html?categoryId=${item.categoryId}`;
-                        link.innerText = `${item.categoryName} (${item.productCount})`; // Hiển thị tên thể loại và số lượng sản phẩm
+		function loadListCategory() {
+			fetch('http://localhost:9056/product-service/api/categories/count')
+				.then(response => response.json())
+				.then(data => {
+					console.log(data); // Xem cấu trúc trả về
+					const categoryList = document.getElementById('category-list');
+					categoryList.innerHTML = ''; // Xóa danh sách trước khi thêm mới
 
-                        listItem.appendChild(link);
-                        categoryList.appendChild(listItem);
-                    });
-                })
-                .catch(error => console.error('Error fetching category data:', error));
-        }
-        // Load nội dung từ header.html và chèn vào phần tử #header-placeholder
-        fetch('fragments/header.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('header-placeholder').innerHTML = data;
-                // Sau khi header được nhúng, kích hoạt script trong header
-                loadUserProfile();
-                initHeaderScripts();
-                loadListCategory();
-                loadOpenCarItem();
-            })
-            .catch(error => console.error('Error loading header:', error));
-    </script>
-    <!--************************************
+					data.forEach(item => {
+						const listItem = document.createElement('li');
+						const link = document.createElement('a');
+						link.href = `/templates/web/shop.html?categoryId=${item.categoryId}`;
+						link.innerText = `${item.categoryName} (${item.productCount})`; // Hiển thị tên thể loại và số lượng sản phẩm
+
+						listItem.appendChild(link);
+						categoryList.appendChild(listItem);
+					});
+				})
+				.catch(error => console.error('Error fetching category data:', error));
+		}
+		// Load nội dung từ header.html và chèn vào phần tử #header-placeholder
+		fetch('fragments/header.html')
+			.then(response => response.text())
+			.then(data => {
+				document.getElementById('header-placeholder').innerHTML = data;
+				// Sau khi header được nhúng, kích hoạt script trong header
+				loadUserProfile();
+				initHeaderScripts();
+				loadListCategory();
+				loadOpenCarItem();
+			})
+			.catch(error => console.error('Error loading header:', error));
+	</script>
+	<!--************************************
 				Header End
 		*************************************-->
 
