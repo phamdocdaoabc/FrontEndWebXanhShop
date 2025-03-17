@@ -1,283 +1,437 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="UTF-8" />
+    <title>Greenty - Trang quản trị</title>
+    <meta
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+      name="viewport"
+    />
+    <link rel="icon" href="/static/assets/img/icon.ico" type="image/x-icon" />
 
-<head>
-	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-	<meta charset="UTF-8" />
-	<title>Greenty - Trang quản trị</title>
-	<meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
-	<link rel="icon" href="/static/assets/img/icon.ico" type="image/x-icon" />
+    <!-- Fonts and icons -->
+    <script src="/static/assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Lato:300,400,700,900"] },
+        custom: {
+          families: [
+            "Flaticon",
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["/static/assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
 
-	<!-- Fonts and icons -->
-	<script src="/static/assets/js/plugin/webfont/webfont.min.js"></script>
-	<script>
-		WebFont.load({
-			google: { "families": ["Lato:300,400,700,900"] },
-			custom: { "families": ["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['/static/assets/css/fonts.min.css'] },
-			active: function () {
-				sessionStorage.fonts = true;
-			}
-		});
-	</script>
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/assets/css/atlantis.min.css" />
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link rel="stylesheet" href="/static/assets/css/demo.css" />
+  </head>
 
-	<!-- CSS Files -->
-	<link rel="stylesheet" href="/static/assets/css/bootstrap.min.css">
-	<link rel="stylesheet" href="/static/assets/css/atlantis.min.css">
-	<!-- CSS Just for demo purpose, don't include it in your project -->
-	<link rel="stylesheet" href="/static/assets/css/demo.css">
-</head>
+  <body>
+    <div class="wrapper">
+      <!-- Header -->
+      <header id="header-placeholder"></header>
+      <script>
+        // Load nội dung từ header.html
+        fetch("fragments/header.html")
+          .then((response) => response.text())
+          .then((data) => {
+            document.getElementById("header-placeholder").innerHTML = data;
+          })
+          .catch((error) => console.error("Error loading header:", error));
+      </script>
+      <!-- End Header -->
 
-<body>
-	<div class="wrapper">
-		<!-- Header -->
-		<header id="header-placeholder"></header>
-		<script>
-			// Load nội dung từ header.html
-			fetch('fragments/header.html')
-				.then(response => response.text())
-				.then(data => {
-					document.getElementById('header-placeholder').innerHTML = data;
-				})
-				.catch(error => console.error('Error loading header:', error));
-		</script>
-		<!-- End Header -->
+      <!-- Navbar -->
+      <header id="navbar-placeholder"></header>
+      <script>
+        function loadAdminProfile() {
+          const token = localStorage.getItem("token"); // Lấy token từ localStorage
+          console.log("Token:", token); // Hiển thị token ra console
 
-		<!-- Navbar -->
-		<header id="navbar-placeholder"></header>
-		<script>
-			function loadAdminProfile() {
-				const token = localStorage.getItem('token'); // Lấy token từ localStorage
-				console.log('Token:', token); // Hiển thị token ra console
+          // Lấy phần tử chứa thông tin user
+          const userProfileElement = document.getElementById("user-profile");
+          const userNameElement = document.getElementById("user-name");
+          const userAvatarElement = document.getElementById("user-avatar");
 
-				// Lấy phần tử chứa thông tin user
-				const userProfileElement = document.getElementById('user-profile');
-				const userNameElement = document.getElementById('user-name');
-				const userAvatarElement = document.getElementById('user-avatar');
+          // Kiểm tra nếu không có token
+          if (!token) {
+            console.error("Bạn chưa đăng nhập!");
+            userProfileElement.style.display = "none"; // Ẩn avatar và userName
+            return;
+          }
 
-				// Kiểm tra nếu không có token
-				if (!token) {
-					console.error('Bạn chưa đăng nhập!');
-					userProfileElement.style.display = 'none'; // Ẩn avatar và userName
-					return;
-				}
+          // Gọi API để lấy thông tin người dùng
+          fetch("http://localhost:9056/user-service/api/profile/infor", {
+            method: "GET",
+            headers: { Authorization: "Bearer " + token },
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Không thể tải thông tin người dùng!");
+              }
+              return response.json();
+            })
+            .then((data) => {
+              console.log("Thông tin người dùng:", data);
 
-				// Gọi API để lấy thông tin người dùng
-				fetch('http://localhost:9056/user-service/api/profile/infor', {
-					method: 'GET',
-					headers: { 'Authorization': 'Bearer ' + token }
-				})
-					.then(response => {
-						if (!response.ok) {
-							throw new Error('Không thể tải thông tin người dùng!');
-						}
-						return response.json();
-					})
-					.then(data => {
-						console.log('Thông tin người dùng:', data);
+              // Hiển thị thông tin người dùng
+              if (data.fullName) {
+                userNameElement.textContent = data.fullName;
+              } else {
+                userNameElement.textContent = "Admin";
+              }
 
-						// Hiển thị thông tin người dùng
-						if (data.fullName) {
-							userNameElement.textContent = data.fullName;
-						} else {
-							userNameElement.textContent = "Admin";
-						}
+              // Hiển thị avatar
+              if (data.imageUrl) {
+                userAvatarElement.src =
+                  "data:image/png;base64," + data.imageUrl;
+              } else {
+                userAvatarElement.src = "/static/images/user.png"; // Avatar mặc định
+              }
 
-						// Hiển thị avatar
-						if (data.imageUrl) {
-							userAvatarElement.src = "data:image/png;base64," + data.imageUrl;
-						} else {
-							userAvatarElement.src = '/static/images/user.png'; // Avatar mặc định
-						}
+              // Hiển thị phần tử sau khi có dữ liệu
+              userProfileElement.style.display = "block";
+            })
+            .catch((error) => {
+              console.error("Lỗi khi tải thông tin người dùng:", error);
+              userAvatarElement.src = "/static/images/user.png"; // Avatar mặc định khi lỗi
+              userProfileElement.style.display = "none"; // Ẩn thông tin nếu xảy ra lỗi
+            });
+        }
+        // Load nội dung từ navbar.html
+        fetch("fragments/navbar.html")
+          .then((response) => response.text())
+          .then((data) => {
+            document.getElementById("navbar-placeholder").innerHTML = data;
+            loadAdminProfile();
+          })
+          .catch((error) => console.error("Error loading navbar:", error));
+      </script>
+      <!-- End Navbar -->
 
-						// Hiển thị phần tử sau khi có dữ liệu
-						userProfileElement.style.display = 'block';
-					})
-					.catch(error => {
-						console.error('Lỗi khi tải thông tin người dùng:', error);
-						userAvatarElement.src = '/static/images/user.png'; // Avatar mặc định khi lỗi
-						userProfileElement.style.display = 'none'; // Ẩn thông tin nếu xảy ra lỗi
-					});
-			}
-			// Load nội dung từ navbar.html
-			fetch('fragments/navbar.html')
-				.then(response => response.text())
-				.then(data => {
-					document.getElementById('navbar-placeholder').innerHTML = data;
-					loadAdminProfile();
-				})
-				.catch(error => console.error('Error loading navbar:', error));
-		</script>
-		<!-- End Navbar -->
+      <div class="main-panel">
+        <div class="content">
+          <div class="page-inner">
+            <div class="page-header">
+              <h4 class="page-title text-success">Quản Lý Thống Kê</h4>
+              <ul class="breadcrumbs">
+                <li class="nav-home">
+                  <a href="#">
+                    <i class="flaticon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="flaticon-right-arrow"></i>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/admin/home}">Trang chủ</a>
+                </li>
+                <li class="separator">
+                  <i class="flaticon-right-arrow"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Quản Lý Thống Kê</a>
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-header">
+                  <div
+                    class="d-flex align-items-center justify-content-between"
+                  >
+                    <h4 class="card-title" style="text-decoration: underline">
+                      Quản Lý Thống Kê Thể Loại
+                    </h4>
+                    <div class="d-flex">
+                      <!-- Chọn ngày bắt đầu -->
+                      <div class="form-group mb-0 mr-2">
+                        <label for="startDate">Ngày bắt đầu:</label>
+                        <input
+                          type="date"
+                          id="startDate"
+                          class="form-control"
+                        />
+                      </div>
 
-		<div class="main-panel">
-			<div class="content">
-				<div class="page-inner">
-					<div class="page-header">
-						<h4 class="page-title text-success">Quản Lý Thống Kê</h4>
-						<ul class="breadcrumbs">
-							<li class="nav-home">
-								<a href="#">
-									<i class="flaticon-home"></i>
-								</a>
-							</li>
-							<li class="separator">
-								<i class="flaticon-right-arrow"></i>
-							</li>
-							<li class="nav-item">
-								<a th:href="@{/admin/home}">Trang chủ</a>
-							</li>
-							<li class="separator">
-								<i class="flaticon-right-arrow"></i>
-							</li>
-							<li class="nav-item">
-								<a href="#">Quản Lý Thống Kê</a>
-							</li>
-						</ul>
-					</div>
-					<div class="col-md-12">
-						<div class="card">
-							<div class="card-header">
-								<div class="d-flex align-items-center justify-content-between">
-									<h4 class="card-title" style="text-decoration: underline;">Quản Lý Thống Kê Thể Loại</h4>
-									<div class="d-flex">
-										<!-- Chọn ngày bắt đầu -->
-										<div class="form-group mb-0 mr-2">
-											<label for="startDate">Ngày bắt đầu:</label>
-											<input type="date" id="startDate" class="form-control">
-										</div>
-							
-										<!-- Chọn ngày kết thúc -->
-										<div class="form-group mb-0 mr-2">
-											<label for="endDate">Ngày kết thúc:</label>
-											<input type="date" id="endDate" class="form-control">
-										</div>
-							
-										<!-- Nút Thống Kê -->
-										<button id="btnStatistic" class="btn btn-primary mt-auto">Thống kê</button>
-									</div>			
-								</div>	
-							</div>
-							<div class="card-body">
-								<div class="table-responsive">
-									<table id="add-row" class="display table table-striped table-hover">
-										<thead>
-											<tr>
-												<th>STT</th>
-												<th>Tên thể loại</th>
-												<th>Số lượng bán ra</th>
-												<th>Doanh thu</th>
-												<th>Giá trung bình</th>
-												<th>Giá thấp nhất</th>
-												<th>Giá cao nhất</th>
-											</tr>
-										</thead>
-										<tfoot>
-											<tr>
-												<th>#</th>
-												<th>Tên thể loại</th>
-												<th>Số lượng bán ra</th>
-												<th>Doanh thu</th>
-												<th>Giá trung bình</th>
-												<th>Giá thấp nhất</th>
-												<th>Giá cao nhất</th>
-											</tr>
-										</tfoot>
-										<tbody>
-											<tr th:each="item, iState : ${listReportCommon}">
-												
-											</tr>
-										</tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<footer class="footer">
-				<div class="container-fluid">
-					<nav class="pull-left">
-						<ul class="nav">
-							<li class="nav-item">
-								<a class="nav-link" href="javascript:void(0);">
-									GREENY-SHOP
-								</a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link" href="javascript:void(0);">
-									Help
-								</a>
-							</li>
-							<li class="nav-item">
-								<a class="nav-link" href="javascript:void(0);">
-									Licenses
-								</a>
-							</li>
-						</ul>
-					</nav>
-					<div class="copyright ml-auto">
-						2024, made with <i class="fa fa-heart heart text-danger"></i> by <a
-							href="javascript:void(0);">GREENY-SHOP</a>
-					</div>
-				</div>
-			</footer>
-		</div>
+                      <!-- Chọn ngày kết thúc -->
+                      <div class="form-group mb-0 mr-2">
+                        <label for="endDate">Ngày kết thúc:</label>
+                        <input type="date" id="endDate" class="form-control" />
+                      </div>
 
-		<!-- End Custom template -->
-	</div>
-	<!--   Core JS Files   -->
-	<script src="/static/assets/js/core/jquery.3.2.1.min.js"></script>
-	<script src="/static/assets/js/core/popper.min.js"></script>
-	<script src="/static/assets/js/core/bootstrap.min.js"></script>
-	<!-- jQuery UI -->
-	<script src="/static/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
-	<script src="/static/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+                      <!-- Nút Thống Kê -->
+                      <button id="btnStatistic" class="btn btn-primary mt-auto">
+                        Thống kê
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table
+                      id="add-row"
+                      class="display table table-striped table-hover"
+                    >
+                      <thead>
+                        <tr>
+                          <th>STT</th>
+                          <th>Tên thể loại</th>
+                          <th>Số lượng bán ra</th>
+                          <th>Doanh thu</th>
+                          <th>Giá trung bình</th>
+                          <th>Giá thấp nhất</th>
+                          <th>Giá cao nhất</th>
+                        </tr>
+                      </thead>
+                      <!-- <tfoot>
+                        <tr>
+                          <th>#</th>
+                          <th>Tên thể loại</th>
+                          <th>Số lượng bán ra</th>
+                          <th>Doanh thu</th>
+                          <th>Giá trung bình</th>
+                          <th>Giá thấp nhất</th>
+                          <th>Giá cao nhất</th>
+                        </tr>
+                      </tfoot> -->
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer class="footer">
+          <div class="container-fluid">
+            <nav class="pull-left">
+              <ul class="nav">
+                <li class="nav-item">
+                  <a class="nav-link" href="javascript:void(0);">
+                    GREENY-SHOP
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="javascript:void(0);"> Help </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="javascript:void(0);"> Licenses </a>
+                </li>
+              </ul>
+            </nav>
+            <div class="copyright ml-auto">
+              2024, made with <i class="fa fa-heart heart text-danger"></i> by
+              <a href="javascript:void(0);">GREENY-SHOP</a>
+            </div>
+          </div>
+        </footer>
+      </div>
 
-	<!-- jQuery Scrollbar -->
-	<script src="/static/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
-	<!-- Datatables -->
-	<script src="/static/assets/js/plugin/datatables/datatables.min.js"></script>
-	<!-- Atlantis JS -->
-	<script src="/static/assets/js/atlantis.min.js"></script>
-	<!-- Atlantis DEMO methods, don't include it in your project! -->
-	<script src="/static/assets/js/setting-demo2.js"></script>
-	<script>
-		$(document).ready(function () {
-			$('#basic-datatables').DataTable({
-			});
+      <!-- End Custom template -->
+    </div>
 
-			$('#multi-filter-select').DataTable({
-				"pageLength": 5,
-				initComplete: function () {
-					this.api().columns().every(function () {
-						var column = this;
-						var select = $('<select class="form-control"><option value=""></option></select>')
-							.appendTo($(column.footer()).empty())
-							.on('change', function () {
-								var val = $.fn.dataTable.util.escapeRegex(
-									$(this).val()
-								);
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        loadCategories(0, 10); // Tải trang đầu tiên với 10 mục mỗi trang
 
-								column
-									.search(val ? '^' + val + '$' : '', true, false)
-									.draw();
-							});
+        document
+          .getElementById("btnStatistic")
+          .addEventListener("click", () => {
+            loadCategories(0, 10); // Load lại dữ liệu khi bấm nút
+          });
+      });
 
-						column.data().unique().sort().each(function (d, j) {
-							select.append('<option value="' + d + '">' + d + '</option>')
-						});
-					});
-				}
-			});
+      // Hàm tải dữ liệu từ API
+      const loadCategories = async (page = 0, size = 10) => {
+        let startDate = document.getElementById("startDate").value;
+        let endDate = document.getElementById("endDate").value;
 
-			// Add Row
-			$('#add-row').DataTable({
-				"pageLength": 5,
-			});
+        // Nếu người dùng chưa chọn, dùng ngày mặc định
+        if (!startDate || !endDate) {
+          const today = new Date();
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setDate(today.getDate() - 7);
 
-			var action = '<td> <div class="form-button-action"> <button type="button" data-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task"> <i class="fa fa-edit"></i> </button> <button type="button" data-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Remove"> <i class="fa fa-times"></i> </button> </div> </td>';
+          startDate = sevenDaysAgo.toISOString().split("T")[0]; // YYYY-MM-DD
+          endDate = today.toISOString().split("T")[0];
 
-			/* $('#addRowButton').click(function() {
+          document.getElementById("startDate").value = startDate;
+          document.getElementById("endDate").value = endDate;
+        }
+
+        const apiUrl = `http://localhost:9056/shipping-service/api/shippings/category_statistics?startDate=${startDate}&endDate=${endDate}&page=${page}&size=${size}`;
+
+        try {
+          const response = await fetch(apiUrl);
+          if (!response.ok) {
+            throw new Error("Lỗi khi lấy dữ liệu từ API!");
+          }
+
+          const data = await response.json();
+          const categories = data.content;
+          const pageInfo = {
+            number: data.number,
+            totalPages: data.totalPages,
+            first: data.first,
+            last: data.last,
+          };
+
+          console.log(data);
+
+          renderTable(categories);
+          renderPagination(pageInfo);
+        } catch (error) {
+          console.error("Lỗi:", error);
+        }
+      };
+
+      // Hiển thị dữ liệu vào bảng
+      const renderTable = (categories) => {
+        const tableBody = document.querySelector("tbody");
+        tableBody.innerHTML = ""; // Xóa dữ liệu cũ
+
+        if (categories.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Không có dữ liệu</td></tr>`;
+          return;
+        }
+
+        categories.forEach((category, index) => {
+          const row = `
+					<tr>
+						<td>${index + 1}</td>
+						<td>${category.categoryName}</td>
+						<td>${category.soldQuantity}</td>
+						<td>${category.revenue.toLocaleString("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            })}</td>
+						<td>${category.averagePrice.toLocaleString("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            })}</td>
+						<td>${category.minPrice.toLocaleString("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            })}</td>
+						<td>${category.maxPrice.toLocaleString("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            })}</td>
+					</tr>
+				`;
+          tableBody.insertAdjacentHTML("beforeend", row);
+        });
+      };
+
+      // Hiển thị phân trang
+      const renderPagination = (pageInfo) => {
+        const paginationContainer = document.querySelector(".pagination");
+        paginationContainer.innerHTML = ""; // Xóa nút cũ
+
+        const { number, totalPages, first, last } = pageInfo;
+
+        // Nút "Previous"
+        const prevButton = document.createElement("button");
+        prevButton.textContent = "Previous";
+        prevButton.disabled = first; // Vô hiệu hóa nếu là trang đầu
+        prevButton.onclick = () => loadCategories(number - 1);
+        paginationContainer.appendChild(prevButton);
+
+        // Nút số trang
+        for (let i = 0; i < totalPages; i++) {
+          const pageButton = document.createElement("button");
+          pageButton.textContent = i + 1;
+          pageButton.classList.add("page-button");
+          if (i === number) {
+            pageButton.classList.add("active"); // Đánh dấu trang hiện tại
+          }
+          pageButton.onclick = () => loadCategories(i);
+          paginationContainer.appendChild(pageButton);
+        }
+
+        // Nút "Next"
+        const nextButton = document.createElement("button");
+        nextButton.textContent = "Next";
+        nextButton.disabled = last; // Vô hiệu hóa nếu là trang cuối
+        nextButton.onclick = () => loadCategories(number + 1);
+        paginationContainer.appendChild(nextButton);
+      };
+    </script>
+
+    <!--   Core JS Files   -->
+    <script src="/static/assets/js/core/jquery.3.2.1.min.js"></script>
+    <script src="/static/assets/js/core/popper.min.js"></script>
+    <script src="/static/assets/js/core/bootstrap.min.js"></script>
+    <!-- jQuery UI -->
+    <script src="/static/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <script src="/static/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="/static/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <!-- Datatables -->
+    <script src="/static/assets/js/plugin/datatables/datatables.min.js"></script>
+    <!-- Atlantis JS -->
+    <script src="/static/assets/js/atlantis.min.js"></script>
+    <!-- Atlantis DEMO methods, don't include it in your project! -->
+    <script src="/static/assets/js/setting-demo2.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#basic-datatables").DataTable({});
+
+        $("#multi-filter-select").DataTable({
+          pageLength: 5,
+          initComplete: function () {
+            this.api()
+              .columns()
+              .every(function () {
+                var column = this;
+                var select = $(
+                  '<select class="form-control"><option value=""></option></select>'
+                )
+                  .appendTo($(column.footer()).empty())
+                  .on("change", function () {
+                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                    column
+                      .search(val ? "^" + val + "$" : "", true, false)
+                      .draw();
+                  });
+
+                column
+                  .data()
+                  .unique()
+                  .sort()
+                  .each(function (d, j) {
+                    select.append(
+                      '<option value="' + d + '">' + d + "</option>"
+                    );
+                  });
+              });
+          },
+        });
+
+        // Add Row
+        $("#add-row").DataTable({
+          pageLength: 5,
+        });
+
+        var action =
+          '<td> <div class="form-button-action"> <button type="button" data-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task"> <i class="fa fa-edit"></i> </button> <button type="button" data-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Remove"> <i class="fa fa-times"></i> </button> </div> </td>';
+
+        /* $('#addRowButton').click(function() {
 				$('#add-row').dataTable().fnAddData([
 					$("#addName").val(),
 					$("#addPosition").val(),
@@ -287,8 +441,7 @@
 				$('#addRowModal').modal('hide');
 
 			}); */
-		});
-	</script>
-</body>
-
+      });
+    </script>
+  </body>
 </html>
